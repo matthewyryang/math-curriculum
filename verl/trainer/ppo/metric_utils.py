@@ -21,7 +21,9 @@ import numpy as np
 from verl import DataProto
 from collections import Counter, defaultdict
 from functools import partial
-
+import seaborn as sns
+import matplotlib.pyplot as plt
+import os
 
 def reduce_metrics(metrics: Dict[str, List[Any]]) -> Dict[str, Any]:
     for key, val in metrics.items():
@@ -45,7 +47,7 @@ def _compute_response_info(batch: DataProto) -> Dict[str, Any]:
     )
 
 
-def compute_data_metrics(batch: DataProto, use_critic: bool = True) -> Dict[str, Any]:
+def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_name: str = "", global_steps: int = 0, test_freq: int = -1) -> Dict[str, Any]:
     # TODO: add response length
     sequence_score = batch.batch['token_level_scores'].sum(-1)
     sequence_reward = batch.batch['token_level_rewards'].sum(-1)
@@ -130,6 +132,54 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True) -> Dict[str,
         'prompt_length/clip_ratio':
             torch.mean(torch.eq(prompt_length, max_prompt_length).float()).detach().item(),
     }
+
+    # add metrics by difficulty
+    correct_lengths_by_difficulty = defaultdict(list)
+    incorrect_lengths_by_difficulty = defaultdict(list)
+    rewards_by_difficulty = defaultdict(list)
+
+    for ref_model_reward, reward, length in zip(batch.non_tensor_batch['reward'], sequence_reward, response_length):
+        binary_reward = 1 if reward > 0.9 else 0
+        
+        if ref_model_reward > 10 / 16:
+            difficulty = 'easy'
+        elif ref_model_reward == 0:
+            difficulty = 'hard'
+        else:
+            difficulty = 'medium'
+
+        rewards_by_difficulty[difficulty].append(binary_reward)
+        if binary_reward == 1:
+            correct_lengths_by_difficulty[difficulty].append(length.detach().item())
+        else:
+            incorrect_lengths_by_difficulty[difficulty].append(length.detach().item())
+    
+    for difficulty in rewards_by_difficulty:
+        mean_reward = np.mean(rewards_by_difficulty[difficulty])
+        mean_length = np.mean(correct_lengths_by_difficulty[difficulty] + incorrect_lengths_by_difficulty[difficulty])
+        
+        if len(correct_lengths_by_difficulty[difficulty]) > 0:
+            mean_correct_length = np.mean(correct_lengths_by_difficulty[difficulty])
+        else:
+            mean_correct_length = -1
+        
+        if len(incorrect_lengths_by_difficulty[difficulty]) > 0:
+            mean_incorrect_length = np.mean(incorrect_lengths_by_difficulty[difficulty])
+        else:
+            mean_incorrect_length = -1
+        
+        metrics[f'difficulty/reward/{difficulty}'] = mean_reward
+        metrics[f'difficulty/0_length/{difficulty}'] = mean_incorrect_length
+        metrics[f'difficulty/1_length/{difficulty}'] = mean_correct_length
+        metrics[f'difficulty/length/{difficulty}'] = mean_length
+
+    if (global_steps - 1) % test_freq == 0:
+        # advantage histograms
+        advantages = valid_adv[:, 0].detach().cpu().numpy().tolist()
+        sns.histplot(advantages)
+        os.makedirs(f'outputs/{experiment_name}/{global_steps}', exist_ok=True)
+        plt.savefig(f'outputs/{experiment_name}/{global_steps}/advantage.png')
+
     return metrics
 
 
