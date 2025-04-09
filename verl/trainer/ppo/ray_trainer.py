@@ -990,7 +990,7 @@ class RayPPOTrainer(object):
                             self._save_checkpoint()
 
                 # collect metrics
-                metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
+                metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic, experiment_name=self.config.trainer.experiment_name, global_steps=self.global_steps, test_freq=self.config.trainer.test_freq, tokenizer=self.tokenizer))
                 metrics.update(compute_timing_metrics(batch=batch, timing_raw=timing_raw))
                 metrics.update({"steps/steps": self.global_steps, "steps/compute_matched_steps": self.global_compute_steps})
                 # TODO: implement actual tflpo and theoretical tflpo
