@@ -217,6 +217,8 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
         sns.histplot(advantages)
         os.makedirs(f'outputs/{experiment_name}/{global_steps}', exist_ok=True)
         plt.savefig(f'outputs/{experiment_name}/{global_steps}/advantage.png')
+        plt.clf()
+        plt.close()
 
     return metrics
 
