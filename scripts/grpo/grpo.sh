@@ -29,12 +29,12 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.enforce_eager=False \
     actor_rollout_ref.rollout.free_cache_engine=False \
     algorithm.use_kl_in_reward=False \
+    custom_reward_function.path=verl/utils/reward_score/curriculum_math/compute_score.py \
     trainer.critic_warmup=0 \
     trainer.logger=['console','wandb'] \
-    trainer.project_name= \
+    trainer.project_name=Math \
     trainer.experiment_name=$EXPERIMENT_NAME \
     trainer.val_before_train=True \
-    trainer.default_local_dir=$OUTPUT_DIR \
     trainer.n_gpus_per_node=8 \
     trainer.nnodes=1 \
     trainer.save_freq=99 \

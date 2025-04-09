@@ -506,6 +506,7 @@ class RayPPOTrainer(object):
         self.validation_generations_logger.log(self.config.trainer.logger, samples, self.global_steps)
 
     def _validate(self):
+        reward_tensor_lst = []
         data_source_lst = []
         reward_extra_infos_dict: dict[str, list] = defaultdict(list)
 
@@ -577,6 +578,7 @@ class RayPPOTrainer(object):
                 for key, lst in result["reward_extra_info"].items():
                     reward_extra_infos_dict[key].extend(lst)
 
+            reward_tensor_lst.append(reward_tensor)
             data_source_lst.append(test_batch.non_tensor_batch.get('data_source', ['unknown'] * reward_tensor.shape[0]))
 
         self._maybe_log_val_generations(inputs=sample_inputs, outputs=sample_outputs, scores=sample_scores)
@@ -584,23 +586,35 @@ class RayPPOTrainer(object):
         for key_info, lst in reward_extra_infos_dict.items():
             assert len(lst) == 0 or len(lst) == len(sample_scores), f"{key_info}: {len(lst)=}, {len(sample_scores)=}"
 
+        reward_tensor = torch.cat(reward_tensor_lst, dim=0).sum(-1).cpu()  # (batch_size,)
         data_sources = np.concatenate(data_source_lst, axis=0)
+        # evaluate test_score based on data source
+        data_source_reward = {}
+        for i in range(reward_tensor.shape[0]):
+            data_source = data_sources[i]
+            if data_source not in data_source_reward:
+                data_source_reward[data_source] = []
+            data_source_reward[data_source].append(reward_tensor[i].item())
 
-        data_src2var2metric2val = process_validation_metrics(data_sources, sample_inputs, reward_extra_infos_dict)
         metric_dict = {}
-        for data_source, var2metric2val in data_src2var2metric2val.items():
-            core_var = "acc" if "acc" in var2metric2val else "reward"
-            for var_name, metric2val in var2metric2val.items():
-                n_max = max([int(name.split("@")[-1].split("/")[0]) for name in metric2val.keys()])
-                for metric_name, metric_val in metric2val.items():
-                    if var_name == core_var and any(
-                            metric_name.startswith(pfx)
-                            for pfx in ["mean", "std", "maj", "best"]) and f"@{n_max}/" in metric_name:
-                        metric_sec = "val-core"
-                    else:
-                        metric_sec = "val-aux"
-                    pfx = f"{metric_sec}/{data_source}/{var_name}/{metric_name}"
-                    metric_dict[pfx] = metric_val
+        for data_source, rewards in data_source_reward.items():
+            metric_dict[f'val/test_score/{data_source}'] = np.mean(rewards)
+
+        # data_src2var2metric2val = process_validation_metrics(data_sources, sample_inputs, reward_extra_infos_dict)
+        # metric_dict = {}
+        # for data_source, var2metric2val in data_src2var2metric2val.items():
+        #     core_var = "acc" if "acc" in var2metric2val else "reward"
+        #     for var_name, metric2val in var2metric2val.items():
+        #         n_max = max([int(name.split("@")[-1].split("/")[0]) for name in metric2val.keys()])
+        #         for metric_name, metric_val in metric2val.items():
+        #             if var_name == core_var and any(
+        #                     metric_name.startswith(pfx)
+        #                     for pfx in ["mean", "std", "maj", "best"]) and f"@{n_max}/" in metric_name:
+        #                 metric_sec = "val-core"
+        #             else:
+        #                 metric_sec = "val-aux"
+        #             pfx = f"{metric_sec}/{data_source}/{var_name}/{metric_name}"
+        #             metric_dict[pfx] = metric_val
 
         return metric_dict
 
@@ -808,6 +822,7 @@ class RayPPOTrainer(object):
                           config=OmegaConf.to_container(self.config, resolve=True))
 
         self.global_steps = 0
+        self.global_compute_steps = 0
 
         # load checkpoint before doing anything
         self._load_checkpoint()
@@ -977,6 +992,7 @@ class RayPPOTrainer(object):
                 # collect metrics
                 metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
                 metrics.update(compute_timing_metrics(batch=batch, timing_raw=timing_raw))
+                metrics.update({"steps/steps": self.global_steps, "steps/compute_matched_steps": self.global_compute_steps})
                 # TODO: implement actual tflpo and theoretical tflpo
                 n_gpus = self.resource_pool_manager.get_n_gpus()
                 metrics.update(compute_throughout_metrics(batch=batch, timing_raw=timing_raw, n_gpus=n_gpus))
@@ -991,3 +1007,4 @@ class RayPPOTrainer(object):
 
                 progress_bar.update(1)
                 self.global_steps += 1
+                self.global_compute_steps += torch.sum(batch.batch['response_mask']).detach().item()

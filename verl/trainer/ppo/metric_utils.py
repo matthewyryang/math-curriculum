@@ -175,7 +175,7 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
 
     if (global_steps - 1) % test_freq == 0:
         # advantage histograms
-        advantages = valid_adv[:, 0].detach().cpu().numpy().tolist()
+        advantages = valid_adv.detach().cpu().tolist()
         sns.histplot(advantages)
         os.makedirs(f'outputs/{experiment_name}/{global_steps}', exist_ok=True)
         plt.savefig(f'outputs/{experiment_name}/{global_steps}/advantage.png')
