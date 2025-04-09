@@ -210,6 +210,7 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
         
         metrics[f'difficulty/0_verification/{difficulty}'] = mean_incorrect_v_cnt
         metrics[f'difficulty/1_verification/{difficulty}'] = mean_correct_v_cnt
+        metrics[f'difficulty/verification/{difficulty}'] = mean_v_cnt
 
     if (global_steps - 1) % test_freq == 0:
         # advantage histograms
