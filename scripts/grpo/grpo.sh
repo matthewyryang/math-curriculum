@@ -38,6 +38,6 @@ python3 -m verl.trainer.main_ppo \
     trainer.val_before_train=True \
     trainer.n_gpus_per_node=8 \
     trainer.nnodes=1 \
-    trainer.save_freq=99 \
-    trainer.test_freq=24 \
-    trainer.total_epochs=2 $@
+    trainer.save_freq=100 \
+    trainer.test_freq=25 \
+    trainer.total_epochs=$EPOCHS $@

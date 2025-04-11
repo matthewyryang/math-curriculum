@@ -515,6 +515,9 @@ class RayPPOTrainer(object):
         sample_outputs = []
         sample_scores = []
 
+        # difficulty
+        difficulties = []
+
         for test_data in self.val_dataloader:
             test_batch = DataProto.from_single_dict(test_data)
 
@@ -581,6 +584,8 @@ class RayPPOTrainer(object):
             reward_tensor_lst.append(reward_tensor)
             data_source_lst.append(test_batch.non_tensor_batch.get('data_source', ['unknown'] * reward_tensor.shape[0]))
 
+            difficulties.extend(list(test_batch.non_tensor_batch['reward']))
+
         self._maybe_log_val_generations(inputs=sample_inputs, outputs=sample_outputs, scores=sample_scores)
 
         for key_info, lst in reward_extra_infos_dict.items():
@@ -590,15 +595,30 @@ class RayPPOTrainer(object):
         data_sources = np.concatenate(data_source_lst, axis=0)
         # evaluate test_score based on data source
         data_source_reward = {}
+        data_source_difficulty = defaultdict(lambda: defaultdict(list))
         for i in range(reward_tensor.shape[0]):
             data_source = data_sources[i]
             if data_source not in data_source_reward:
                 data_source_reward[data_source] = []
             data_source_reward[data_source].append(reward_tensor[i].item())
 
+            ref_model_reward = difficulties[i]
+            if ref_model_reward > 10 / 16:
+                difficulty = 'easy'
+            elif ref_model_reward == 0:
+                difficulty = 'hard'
+            else:
+                difficulty = 'medium'
+            
+            data_source_difficulty[data_source][difficulty].append(reward_tensor[i].item())
+            
+
         metric_dict = {}
         for data_source, rewards in data_source_reward.items():
             metric_dict[f'val/test_score/{data_source}'] = np.mean(rewards)
+            
+            for difficulty, per_difficulty_rewards in data_source_difficulty[data_source].items():
+                metric_dict[f'val/test_score/{data_source}{difficulty}'] = np.mean(per_difficulty_rewards)
 
         # data_src2var2metric2val = process_validation_metrics(data_sources, sample_inputs, reward_extra_infos_dict)
         # metric_dict = {}
