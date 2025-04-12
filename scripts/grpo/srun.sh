@@ -1,9 +1,9 @@
-export DATA_DISTRIBUTION="train"
 export CONTEXT_LENGTH=2048
-export BASE_MODEL=deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
-# export BASE_MODEL=/home/cmu/math-curriculum/checkpoints/Math/easy-4096/global_step_200/hf
+export BASE_MODEL=Qwen/Qwen2.5-Math-1.5B
 
+export DATA_DISTRIBUTION="train-3-5"
 export EXPERIMENT_NAME="$DATA_DISTRIBUTION-$CONTEXT_LENGTH"
+export EPOCHS=8
 
 # ray stop --force && ray start --head
 

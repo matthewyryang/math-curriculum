@@ -1,7 +1,7 @@
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
-    data.train_files=$HOME/math-curriculum/data/$DATA_DISTRIBUTION.parquet \
-    data.val_files=$HOME/math-curriculum/data/test.parquet \
+    data.train_files=$HOME/math-curriculum/data/math/$DATA_DISTRIBUTION.parquet \
+    data.val_files=$HOME/math-curriculum/data/math/test-1-5.parquet \
     data.train_batch_size=128 \
     data.max_prompt_length=512 \
     data.max_response_length=$CONTEXT_LENGTH \

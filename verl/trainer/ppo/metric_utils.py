@@ -165,16 +165,19 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
     incorrect_lengths_by_difficulty = defaultdict(list)
     rewards_by_difficulty = defaultdict(list)
 
-    for ref_model_reward, reward, length, v_cnt in zip(batch.non_tensor_batch['reward'], sequence_reward, response_length, verification_cnts):
+    # for ref_model_reward, reward, length, v_cnt in zip(batch.non_tensor_batch['reward'], sequence_reward, response_length, verification_cnts):
+    #     binary_reward = 1 if reward > 0.9 else 0
+        
+    #     if ref_model_reward > 10 / 16:
+    #         difficulty = 'easy'
+    #     elif ref_model_reward == 0:
+    #         difficulty = 'hard'
+    #     else:
+    #         difficulty = 'medium'
+
+    for difficulty, reward, length, v_cnt in zip(batch.non_tensor_batch['level'], sequence_reward, response_length, verification_cnts):
         binary_reward = 1 if reward > 0.9 else 0
         
-        if ref_model_reward > 10 / 16:
-            difficulty = 'easy'
-        elif ref_model_reward == 0:
-            difficulty = 'hard'
-        else:
-            difficulty = 'medium'
-
         rewards_by_difficulty[difficulty].append(binary_reward)
         if binary_reward == 1:
             correct_lengths_by_difficulty[difficulty].append(length.detach().item())

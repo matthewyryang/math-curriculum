@@ -584,7 +584,8 @@ class RayPPOTrainer(object):
             reward_tensor_lst.append(reward_tensor)
             data_source_lst.append(test_batch.non_tensor_batch.get('data_source', ['unknown'] * reward_tensor.shape[0]))
 
-            difficulties.extend(list(test_batch.non_tensor_batch['reward']))
+            # difficulties.extend(list(test_batch.non_tensor_batch['reward']))
+            difficulties.extend(list(test_batch.non_tensor_batch['level']))
 
         self._maybe_log_val_generations(inputs=sample_inputs, outputs=sample_outputs, scores=sample_scores)
 
@@ -618,13 +619,14 @@ class RayPPOTrainer(object):
                 data_source_reward[data_source] = []
             data_source_reward[data_source].append(reward_tensor[i].item())
 
-            ref_model_reward = difficulties[i]
-            if ref_model_reward > 10 / 16:
-                difficulty = 'easy'
-            elif ref_model_reward == 0:
-                difficulty = 'hard'
-            else:
-                difficulty = 'medium'
+            # ref_model_reward = difficulties[i]
+            # if ref_model_reward > 10 / 16:
+            #     difficulty = 'easy'
+            # elif ref_model_reward == 0:
+            #     difficulty = 'hard'
+            # else:
+            #     difficulty = 'medium'
+            difficulty = difficulties[i]
             
             data_source_difficulty[data_source][difficulty].append(reward_tensor[i].item())
             
