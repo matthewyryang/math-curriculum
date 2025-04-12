@@ -588,6 +588,22 @@ class RayPPOTrainer(object):
 
         self._maybe_log_val_generations(inputs=sample_inputs, outputs=sample_outputs, scores=sample_scores)
 
+        # save rollouts
+        rollouts = []
+        for input, output, score, ref_score, index, split in zip(sample_inputs, sample_outputs, sample_scores, difficulties, indices, splits):
+            rollouts.append(
+                {
+                    'input': input,
+                    'output': output,
+                    'score': score,
+                    'ref_score': ref_score,
+                    'index': index,
+                    'split': split
+                }
+            )
+
+        
+
         for key_info, lst in reward_extra_infos_dict.items():
             assert len(lst) == 0 or len(lst) == len(sample_scores), f"{key_info}: {len(lst)=}, {len(sample_scores)=}"
 
@@ -619,6 +635,8 @@ class RayPPOTrainer(object):
             
             for difficulty, per_difficulty_rewards in data_source_difficulty[data_source].items():
                 metric_dict[f'val/test_score/{data_source}{difficulty}'] = np.mean(per_difficulty_rewards)
+
+
 
         # data_src2var2metric2val = process_validation_metrics(data_sources, sample_inputs, reward_extra_infos_dict)
         # metric_dict = {}
