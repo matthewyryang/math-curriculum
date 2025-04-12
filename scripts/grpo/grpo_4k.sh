@@ -1,27 +1,26 @@
 #!/bin/bash
 
 export VLLM_ATTENTION_BACKEND=XFORMERS
-export EXPERIMENT_NAME="qwen-2.5-math-1.5b-16k"
-# export MODEL_PATH="/project/flame/asetlur/hub/models--deepseek-ai--DeepSeek-R1-Distill-Qwen-1.5B/snapshots/ad9f0ae0864d7fbcd1cd905e3c6c5b069cc8b562"
-export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-Math-1.5B/snapshots/4a83ca6e4526a4f2da3aa259ec36c259f66b2ab2"
+export EXPERIMENT_NAME="qwen-1.5b-base-3k-r1-template"
+# export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-Math-1.5B/snapshots/4a83ca6e4526a4f2da3aa259ec36c259f66b2ab2"
+export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-1.5B/snapshots/8faed761d45a263340a0528343f099c05c9a4323"
 
-# Train over 4 nodes, 8 A100-80GB GPUs per node.
-source /home/asetlur/miniconda3/bin/activate verl 
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
-    data.train_files=$HOME/math-curriculum/data/train.parquet \
+    data.train_files=$HOME/math-curriculum/data/train-3-5.parquet \
     data.val_files=$HOME/math-curriculum/data/test.parquet \
     data.train_batch_size=128 \
-    data.max_prompt_length=512 \
-    data.max_response_length=16384 \
+    data.max_prompt_length=1024 \
+    data.max_response_length=3000 \
     data.filter_overlong_prompts=True \
+    data.prompt_template='r1' \
     actor_rollout_ref.model.path=$MODEL_PATH \
     actor_rollout_ref.actor.optim.lr=1e-6 \
     actor_rollout_ref.model.use_remove_padding=True \
     actor_rollout_ref.actor.ppo_mini_batch_size=64 \
     actor_rollout_ref.actor.ppo_micro_batch_size=64 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \
-    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=32768 \
+    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=24000 \
     actor_rollout_ref.actor.use_kl_loss=True \
     actor_rollout_ref.actor.kl_loss_coef=0.001 \
     actor_rollout_ref.actor.kl_loss_type=low_var_kl \
@@ -34,7 +33,6 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.temperature=0.6 \
     actor_rollout_ref.rollout.val_kwargs.temperature=0.6 \
     actor_rollout_ref.rollout.gpu_memory_utilization=0.9 \
-    actor_rollout_ref.rollout.max_num_batched_tokens=50000 \
     actor_rollout_ref.rollout.n=8 \
     actor_rollout_ref.rollout.val_kwargs.n=8 \
     actor_rollout_ref.ref.fsdp_config.param_offload=True \
@@ -48,7 +46,7 @@ python3 -m verl.trainer.main_ppo \
     trainer.experiment_name=$EXPERIMENT_NAME \
     trainer.val_before_train=True \
     trainer.n_gpus_per_node=8 \
-    trainer.nnodes=4 \
-    trainer.save_freq=99 \
-    trainer.test_freq=24 \
+    trainer.nnodes=1 \
+    trainer.save_freq=100 \
+    trainer.test_freq=25 \
     trainer.total_epochs=2 "${@:1}" > /home/asetlur/math-curriculum/logs/$EXPERIMENT_NAME.log 2>&1

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=DS-16k
+#SBATCH --job-name=verl-ray
 #SBATCH --partition=flame # Or your desired partition
 #SBATCH --nodes=4           # Request exactly 2 nodes
 #SBATCH --ntasks-per-node=1 # Run one main task per node (for ray start)

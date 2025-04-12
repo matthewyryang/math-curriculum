@@ -86,6 +86,14 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
 
     metrics = {
         # score
+        'critic/score/under_2k':
+            torch.mean(sequence_score[response_length <= 2048]).detach().item(),
+        'critic/score/under_4k':
+            torch.mean(sequence_score[response_length <= 4096]).detach().item(),
+        'critic/score/under_8k':
+            torch.mean(sequence_score[response_length <= 8192]).detach().item(),
+        'critic/score/under_16k':
+            torch.mean(sequence_score[response_length <= 16384]).detach().item(),    
         'critic/score/mean':
             torch.mean(sequence_score).detach().item(),
         'critic/score/max':

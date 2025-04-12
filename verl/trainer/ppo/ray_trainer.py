@@ -27,7 +27,8 @@ from copy import deepcopy
 from collections import defaultdict
 from functools import partial
 from tqdm import tqdm
-
+import json
+import verl.utils.hdfs_io as hdfs_io
 import ray
 import numpy as np
 from codetiming import Timer
@@ -172,6 +173,20 @@ def compute_response_mask(data: DataProto):
     attention_mask = data.batch['attention_mask']
     return attention_mask[:, -response_length:]
 
+def r1_prompt_template(question: str):
+    return (
+        "A conversation between User and Assistant. The User asks a question, and the Assistant solves it. The Assistant first thinks about the reasoning process in the mind and then provides the User with the answer. "
+        "The reasoning process is enclosed within <think> </think> and answer is enclosed within <answer> </answer> tags, respectively, i.e., <think> reasoning process here </think> <answer> answer here </answer>.\nUser: "
+        + question
+        + "\nAssistant: <think>"
+    )
+
+
+def get_template(prompt_template):
+    if prompt_template is None:
+        return None
+    elif prompt_template == 'r1':
+        return r1_prompt_template
 
 def compute_advantage(data: DataProto, adv_estimator, gamma=1.0, lam=1.0, num_repeat=1):
     # Back-compatible with trainers that do not compute response mask in fit
@@ -417,7 +432,8 @@ class RayPPOTrainer(object):
                                          return_raw_chat=self.config.data.get('return_raw_chat', False),
                                          truncation=self.config.data.get('truncation', 'error'),
                                          filter_overlong_prompts=self.config.data.filter_overlong_prompts,
-                                         num_workers=self.config.data.get('filter_overlong_prompts_workers', None))
+                                         num_workers=self.config.data.get('filter_overlong_prompts_workers', None),
+                                         chat_template_func=get_template(self.config.data.get('prompt_template', None)))
         assert self.train_dataset.truncation == self.config.data.get(
             'truncation', 'error'
         ), f'dataset truncation {self.train_dataset.truncation} must be the same as config {self.config.data.get("truncation", "error")}'
@@ -446,7 +462,8 @@ class RayPPOTrainer(object):
                                        return_raw_chat=self.config.data.get('return_raw_chat', False),
                                        truncation=self.config.data.get('truncation', 'error'),
                                        filter_overlong_prompts=self.config.data.filter_overlong_prompts,
-                                       num_workers=self.config.data.get('filter_overlong_prompts_workers', None))
+                                       num_workers=self.config.data.get('filter_overlong_prompts_workers', None),
+                                       chat_template_func=get_template(self.config.data.get('prompt_template', None)))
         assert self.val_dataset.truncation == self.config.data.get(
             'truncation', 'error'
         ), f'dataset truncation {self.val_dataset.truncation} must be the same as config {self.config.data.get("truncation", "error")}'
@@ -514,6 +531,8 @@ class RayPPOTrainer(object):
         sample_inputs = []
         sample_outputs = []
         sample_scores = []
+        sample_indices = []
+        sample_splits = []
 
         # difficulty
         difficulties = []
@@ -584,14 +603,29 @@ class RayPPOTrainer(object):
             reward_tensor_lst.append(reward_tensor)
             data_source_lst.append(test_batch.non_tensor_batch.get('data_source', ['unknown'] * reward_tensor.shape[0]))
 
-            # difficulties.extend(list(test_batch.non_tensor_batch['reward']))
-            difficulties.extend(list(test_batch.non_tensor_batch['level']))
+            extra_info = test_batch.non_tensor_batch.get('extra_info')
+            sample_indices.extend([x['index'] for x in extra_info])
+            sample_splits.extend(x['split'] for x in extra_info)
+            if 'level' in test_batch.non_tensor_batch:
+                difficulties.extend(list(test_batch.non_tensor_batch['level']))
+            else:
+                ref_rewards = list(test_batch.non_tensor_batch['reward'])
+                def return_difficulty(ref_model_reward):
+                    difficulty = 'unknown'
+                    if ref_model_reward > 10 / 16:
+                        difficulty = 'easy'
+                    elif ref_model_reward == 0:
+                        difficulty = 'hard'
+                    else:
+                        difficulty = 'medium'
+                    return difficulty
+                difficulties.extend([return_difficulty(ref_reward) for ref_reward in ref_rewards])
 
         self._maybe_log_val_generations(inputs=sample_inputs, outputs=sample_outputs, scores=sample_scores)
 
         # save rollouts
         rollouts = []
-        for input, output, score, ref_score, index, split in zip(sample_inputs, sample_outputs, sample_scores, difficulties, indices, splits):
+        for input, output, score, ref_score, index, split in zip(sample_inputs, sample_outputs, sample_scores, difficulties, sample_indices, sample_splits):
             rollouts.append(
                 {
                     'input': input,
@@ -603,6 +637,14 @@ class RayPPOTrainer(object):
                 }
             )
 
+        # save rollouts as json
+        # save rollouts as json
+        if self.config.trainer.default_local_dir is not None:
+            hdfs_io.makedirs(self.config.trainer.default_local_dir, exist_ok=True)
+        rollouts_json = json.dumps(rollouts)
+        rollouts_save_location = f"{self.config.trainer.default_local_dir}/{self.global_steps}_rollouts.json"
+        with open(rollouts_save_location, 'w') as f:
+            f.write(rollouts_json)
         
 
         for key_info, lst in reward_extra_infos_dict.items():

@@ -15,6 +15,7 @@ data:
   filter_overlong_prompts_workers: 1
   truncation: error
   image_key: images
+  prompt_template: null
 
 actor_rollout_ref:
   hybrid_engine: True
@@ -195,7 +196,7 @@ trainer:
   project_name: verl_examples
   experiment_name: gsm8k
   logger: [ 'console', 'wandb' ]
-  log_val_generations: 0
+  log_val_generations: 50
   nnodes: 1
   n_gpus_per_node: 8
   save_freq: -1
@@ -207,7 +208,7 @@ trainer:
   critic_warmup: 0
   default_hdfs_dir: null
   del_local_ckpt_after_load: False
-  default_local_dir: checkpoints/${trainer.project_name}/${trainer.experiment_name}
+  default_local_dir: /project/flame/asetlur/checkpoints/math-curriculum/${trainer.project_name}/${trainer.experiment_name}
   max_actor_ckpt_to_keep: null
   max_critic_ckpt_to_keep: null
   # The timeout for ray worker group to wait for the register center to be ready
