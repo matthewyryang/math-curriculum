@@ -49,7 +49,7 @@ def _compute_response_info(batch: DataProto) -> Dict[str, Any]:
 
 def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_name: str = "", global_steps: int = 0, test_freq: int = -1, tokenizer: any = None) -> Dict[str, Any]:
     
-    def check_number_of_verifcation(text):
+    def check_number_of_verification(text):
         steps = text.split('\n')
         cnt = 0
         for i, step in enumerate(steps):
@@ -164,7 +164,7 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
 
         # decode
         response_str = tokenizer.decode(valid_response_ids, skip_special_tokens=True)
-        verification_cnts.append(check_number_of_verifcation(response_str))
+        verification_cnts.append(check_number_of_verification(response_str))
 
     # add metrics by difficulty
     correct_verifications_by_difficulty = defaultdict(list)
@@ -173,17 +173,24 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
     incorrect_lengths_by_difficulty = defaultdict(list)
     rewards_by_difficulty = defaultdict(list)
 
-    # for ref_model_reward, reward, length, v_cnt in zip(batch.non_tensor_batch['reward'], sequence_reward, response_length, verification_cnts):
-    #     binary_reward = 1 if reward > 0.9 else 0
-        
-    #     if ref_model_reward > 10 / 16:
-    #         difficulty = 'easy'
-    #     elif ref_model_reward == 0:
-    #         difficulty = 'hard'
-    #     else:
-    #         difficulty = 'medium'
+    if 'level' not in batch.non_tensor_batch:
+        diffulties = []
+        for ref_model_reward, reward, length, v_cnt in zip(batch.non_tensor_batch['reward'], sequence_reward, response_length, verification_cnts):
+            binary_reward = 1 if reward > 0.9 else 0
+            
+            difficulty = 'unknown'
+            if ref_model_reward > 10 / 16:
+                difficulty = 'easy'
+            elif ref_model_reward == 0:
+                difficulty = 'hard'
+            else:
+                difficulty = 'medium'
 
-    for difficulty, reward, length, v_cnt in zip(batch.non_tensor_batch['level'], sequence_reward, response_length, verification_cnts):
+            diffulties.append(difficulty)
+    else:
+        diffulties = batch.non_tensor_batch['level']
+
+    for difficulty, reward, length, v_cnt in zip(diffulties, sequence_reward, response_length, verification_cnts):
         binary_reward = 1 if reward > 0.9 else 0
         
         rewards_by_difficulty[difficulty].append(binary_reward)

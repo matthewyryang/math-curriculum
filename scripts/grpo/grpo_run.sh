@@ -1,17 +1,20 @@
 #!/bin/bash
 
 export VLLM_ATTENTION_BACKEND=XFORMERS
-export EXPERIMENT_NAME="qwen-1.5b-base-3k-r1-template"
+export EXPERIMENT_NAME="grpo-8k-r1template-SFT-openthoughts2k"
 # export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-Math-1.5B/snapshots/4a83ca6e4526a4f2da3aa259ec36c259f66b2ab2"
-export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-1.5B/snapshots/8faed761d45a263340a0528343f099c05c9a4323"
+# export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-1.5B/snapshots/8faed761d45a263340a0528343f099c05c9a4323"
+# export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-Math-1.5B/snapshots/4a83ca6e4526a4f2da3aa259ec36c259f66b2ab2"
+# export MODEL_PATH="/project/flame/asetlur/hub/models--sail--Qwen2.5-Math-1.5B-Oat-Zero/snapshots/79fbbe3fff006979162b8ae104ab9dfd196fe5ec"
+export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-maxlen3k/global_step_798"
 
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
-    data.train_files=$HOME/math-curriculum/data/train-3-5.parquet \
+    data.train_files=$HOME/math-curriculum/data/train.parquet \
     data.val_files=$HOME/math-curriculum/data/test.parquet \
     data.train_batch_size=128 \
     data.max_prompt_length=1024 \
-    data.max_response_length=3000 \
+    data.max_response_length=8192 \
     data.filter_overlong_prompts=True \
     data.prompt_template='r1' \
     actor_rollout_ref.model.path=$MODEL_PATH \
@@ -20,7 +23,8 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.actor.ppo_mini_batch_size=64 \
     actor_rollout_ref.actor.ppo_micro_batch_size=64 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \
-    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=24000 \
+    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=16384 \
+    actor_rollout_ref.rollout.max_num_batched_tokens=16384 \
     actor_rollout_ref.actor.use_kl_loss=True \
     actor_rollout_ref.actor.kl_loss_coef=0.001 \
     actor_rollout_ref.actor.kl_loss_type=low_var_kl \

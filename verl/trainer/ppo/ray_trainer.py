@@ -175,10 +175,17 @@ def compute_response_mask(data: DataProto):
 
 def r1_prompt_template(question: str):
     return (
-        "A conversation between User and Assistant. The User asks a question, and the Assistant solves it. The Assistant first thinks about the reasoning process in the mind and then provides the User with the answer. "
+        "A conversation between User and Assistant. The User asks a question, and the Assistant solves it. The Assistant first thinks about the reasoning process in the mind. This requires engaging in a comprehensive cycle of analysis, summarizing, exploration, reassessment, reflection, backtracing, and iteration. Then it provides the User with the answer. "
         "The reasoning process is enclosed within <think> </think> and answer is enclosed within <answer> </answer> tags, respectively, i.e., <think> reasoning process here </think> <answer> answer here </answer>.\nUser: "
         + question
-        + "\nAssistant: <think>"
+        + "\nAssistant: "
+    )
+
+def qwen_template(question: str):
+    return (
+        "<|im_start|>system\nPlease reason step by step, and put your final answer within \\boxed{}.<|im_end|>\n<|im_start|>user\n"
+        + question
+        + "<|im_end|>\n<|im_start|>assistant\n"
     )
 
 
@@ -187,6 +194,8 @@ def get_template(prompt_template):
         return None
     elif prompt_template == 'r1':
         return r1_prompt_template
+    elif prompt_template == 'qwen':
+        return qwen_template
 
 def compute_advantage(data: DataProto, adv_estimator, gamma=1.0, lam=1.0, num_repeat=1):
     # Back-compatible with trainers that do not compute response mask in fit
