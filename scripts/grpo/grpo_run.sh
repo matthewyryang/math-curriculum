@@ -23,8 +23,8 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.actor.ppo_mini_batch_size=64 \
     actor_rollout_ref.actor.ppo_micro_batch_size=64 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \
-    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=16384 \
-    actor_rollout_ref.rollout.max_num_batched_tokens=16384 \
+    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=10000 \
+    actor_rollout_ref.rollout.max_num_batched_tokens=10000 \
     actor_rollout_ref.actor.use_kl_loss=True \
     actor_rollout_ref.actor.kl_loss_coef=0.001 \
     actor_rollout_ref.actor.kl_loss_type=low_var_kl \
