@@ -1,12 +1,15 @@
 #!/bin/bash
 
 export VLLM_ATTENTION_BACKEND=XFORMERS
-export EXPERIMENT_NAME="grpo-8k-r1template-SFT-openthoughts2k"
+export EXPERIMENT_NAME="grpo-8k-r1template-SFT1ksteps-openthoughts8k"
 # export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-Math-1.5B/snapshots/4a83ca6e4526a4f2da3aa259ec36c259f66b2ab2"
 # export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-1.5B/snapshots/8faed761d45a263340a0528343f099c05c9a4323"
 # export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-Math-1.5B/snapshots/4a83ca6e4526a4f2da3aa259ec36c259f66b2ab2"
 # export MODEL_PATH="/project/flame/asetlur/hub/models--sail--Qwen2.5-Math-1.5B-Oat-Zero/snapshots/79fbbe3fff006979162b8ae104ab9dfd196fe5ec"
-export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-maxlen3k/global_step_798"
+# export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-maxlen3k/global_step_798"
+# export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-maxlen8k/global_step_192"
+# export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-maxlen8k/global_step_1092"
+export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-maxlen8k-on-qwenr1distill/global_step_1092"
 
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
@@ -23,8 +26,8 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.actor.ppo_mini_batch_size=64 \
     actor_rollout_ref.actor.ppo_micro_batch_size=64 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \
-    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=10000 \
-    actor_rollout_ref.rollout.max_num_batched_tokens=10000 \
+    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=32768 \
+    actor_rollout_ref.rollout.max_num_batched_tokens=32768 \
     actor_rollout_ref.actor.use_kl_loss=True \
     actor_rollout_ref.actor.kl_loss_coef=0.001 \
     actor_rollout_ref.actor.kl_loss_type=low_var_kl \
@@ -36,7 +39,7 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.name=vllm \
     actor_rollout_ref.rollout.temperature=0.6 \
     actor_rollout_ref.rollout.val_kwargs.temperature=0.6 \
-    actor_rollout_ref.rollout.gpu_memory_utilization=0.9 \
+    actor_rollout_ref.rollout.gpu_memory_utilization=0.85 \
     actor_rollout_ref.rollout.n=8 \
     actor_rollout_ref.rollout.val_kwargs.n=8 \
     actor_rollout_ref.ref.fsdp_config.param_offload=True \

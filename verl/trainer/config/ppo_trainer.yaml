@@ -196,7 +196,7 @@ trainer:
   project_name: verl_examples
   experiment_name: gsm8k
   logger: [ 'console', 'wandb' ]
-  log_val_generations: 50
+  log_val_generations: 3
   nnodes: 1
   n_gpus_per_node: 8
   save_freq: -1

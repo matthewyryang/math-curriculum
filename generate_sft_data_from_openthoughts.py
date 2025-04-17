@@ -44,7 +44,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--num_samples", type=int, default=100000, help="No. of samples")
     parser.add_argument("--max_length", type=int, default=17900, help="Max length of the prompt + completion")
-    parser.add_argument("--save_location", type=str, default="/project/flame/asetlur/data/OpenThoughts-114k-r1-format-maxlen3k", help="Save location for the transformed dataset")
+    parser.add_argument("--save_location", type=str, default="/project/flame/asetlur/data/OpenThoughts-114k-r1-format-maxlen8k", help="Save location for the transformed dataset")
     args = parser.parse_args()
 
     # Load the dataset
