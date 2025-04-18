@@ -32,6 +32,25 @@ def set_pad_token_id(tokenizer):
         warnings.warn(f'tokenizer.pad_token is None. Now set to {tokenizer.eos_token}')
 
 
+def r1_prompt_template(question: str):
+    return (
+        "A conversation between User and Assistant. The User asks a question, and the Assistant solves it. The Assistant first thinks about the reasoning process in the mind. This requires engaging in a comprehensive cycle of analysis, summarizing, exploration, reassessment, reflection, backtracing, and iteration. Then it provides the User with the answer. "
+        "The reasoning process is enclosed within <think> </think> and answer is enclosed within <answer> </answer> tags, respectively, i.e., <think> reasoning process here </think> <answer> answer here </answer>.\nUser: "
+        + question
+        + "\nAssistant: "
+    )
+
+def qwen_template(question: str):
+    return (
+        "<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n"
+        + question
+        + "\nPlease reason step by step, and put your final answer within \\boxed{}.<|im_end|>\n<|im_start|>assistant\n"
+    )
+
+def empty_template(question: str):
+    return question
+
+
 def hf_tokenizer(name_or_path, correct_pad_token=True, correct_gemma2=True, **kwargs):
     """Create a huggingface pretrained tokenizer which correctness handles eos and pad tokens.
 
@@ -56,6 +75,15 @@ def hf_tokenizer(name_or_path, correct_pad_token=True, correct_gemma2=True, **kw
     tokenizer = AutoTokenizer.from_pretrained(name_or_path, **kwargs)
     if correct_pad_token:
         set_pad_token_id(tokenizer)
+    
+    def custom_apply_chat_template(prompt, add_generation_prompt=False, tokenize=False):
+        if tokenize:
+            return tokenizer.encode(empty_template(prompt[0]["content"]))
+        else:
+            return empty_template(prompt[0]["content"])
+    
+    tokenizer.apply_chat_template = custom_apply_chat_template
+    
     return tokenizer
 
 
