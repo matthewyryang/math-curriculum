@@ -295,6 +295,11 @@ class DataParallelPPOActor(BasePPOActor):
                     # all return: (bsz, response_length)
                     entropy, log_prob = self._forward_micro_batch(micro_batch=data, temperature=temperature)
 
+                    # only positives
+                    if self.config.only_train_on_positive:
+                        response_mask = response_mask * (advantages > 0).float()
+                        metrics['actor/frac_trained_on'] = (response_mask.shape[0] - (response_mask.sum(dim=-1) == 0.).sum().item()) / response_mask.shape[0]
+
                     pg_loss, pg_clipfrac, ppo_kl, pg_clipfrac_lower = compute_policy_loss(
                         old_log_prob=old_log_prob,
                         log_prob=log_prob,

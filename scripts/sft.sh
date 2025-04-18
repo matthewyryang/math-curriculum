@@ -10,8 +10,9 @@ micro_batch_size_per_gpu=1
 train_batch_size=64
 max_length=8500
 # model_name="Qwen/Qwen2.5-Math-1.5B"
-model_name="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
-experiment_name="math-sft-openthoughts-maxlen8k-on-qwenr1distill"
+# model_name="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+model_name="meta-llama/Llama-3.2-3B"
+experiment_name="math-sft-openthoughts-maxlen8k-on-llama3-3b"
 default_hdfs_dir="/project/flame/asetlur/${experiment_name}"
 default_local_dir="/project/flame/asetlur/${experiment_name}"
 # Create the default local directory if it doesn't exist
@@ -19,7 +20,7 @@ mkdir -p "${default_local_dir}"
 # base_data_path="/project/flame/asetlur/data/OpenThoughts-114k-r1-format"
 base_data_path="/project/flame/asetlur/data/OpenThoughts-114k-r1-format-maxlen8k/"
 project_name="math-sft"
-total_epochs=1
+total_epochs=5
 logger="['console','wandb']"
 truncation="right"
 apply_chat_template=False
