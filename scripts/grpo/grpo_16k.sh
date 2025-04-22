@@ -1,13 +1,15 @@
 #!/bin/bash
 
 export VLLM_ATTENTION_BACKEND=XFORMERS
-export EXPERIMENT_NAME="sft16k-grpo16k-wEnt"
+export EXPERIMENT_NAME="sft16k-grpo8k-grpo16k"
 # export MODEL_PATH="/project/flame/asetlur/hub/models--deepseek-ai--DeepSeek-R1-Distill-Qwen-1.5B/snapshots/ad9f0ae0864d7fbcd1cd905e3c6c5b069cc8b562"
 # export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-Math-1.5B/snapshots/4a83ca6e4526a4f2da3aa259ec36c259f66b2ab2"
 
 # export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/grpo-8k-r1template-SFT1ksteps-openthoughts8k/global_step_200/actor/hf-format"
 # export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/grpo-8k-r1template-SFT1ksteps-openthoughts8k/global_step_100/actor/hf-format"
-export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-maxlen16k/global_step_3176"
+# export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-maxlen16k/global_step_3176"
+
+export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-SFTon16k-qwen-format/global_step_200/actor/hf-format"
 
 # Train over 4 nodes, 8 A100-80GB GPUs per node.
 source /home/asetlur/miniconda3/bin/activate verl 
@@ -18,7 +20,6 @@ python3 -m verl.trainer.main_ppo \
     data.train_batch_size=128 \
     data.max_prompt_length=1200 \
     data.max_response_length=16384 \
-    data.prompt_template='r1' \
     data.filter_overlong_prompts=True \
     actor_rollout_ref.model.path=$MODEL_PATH \
     actor_rollout_ref.actor.optim.lr=1e-6 \
@@ -27,6 +28,7 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.actor.ppo_micro_batch_size=64 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \
     actor_rollout_ref.actor.only_train_on_positive=False \
+    actor_rollout_ref.actor.remove_truncated=False \
     actor_rollout_ref.actor.ppo_max_token_len_per_gpu=32768 \
     actor_rollout_ref.actor.use_kl_loss=True \
     actor_rollout_ref.actor.kl_loss_coef=0.001 \
@@ -39,10 +41,10 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.name=vllm \
     actor_rollout_ref.rollout.temperature=0.6 \
     actor_rollout_ref.rollout.val_kwargs.temperature=0.6 \
-    actor_rollout_ref.rollout.gpu_memory_utilization=0.9 \
+    actor_rollout_ref.rollout.gpu_memory_utilization=0.85 \
     actor_rollout_ref.rollout.max_num_batched_tokens=50000 \
-    actor_rollout_ref.rollout.n=8 \
-    actor_rollout_ref.rollout.val_kwargs.n=8 \
+    actor_rollout_ref.rollout.n=16 \
+    actor_rollout_ref.rollout.val_kwargs.n=16 \
     actor_rollout_ref.ref.fsdp_config.param_offload=True \
     actor_rollout_ref.rollout.enforce_eager=False \
     actor_rollout_ref.rollout.free_cache_engine=False \
