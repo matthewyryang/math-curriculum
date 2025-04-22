@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=verl-ray
+#SBATCH --job-name=ray-multi
 #SBATCH --partition=flame # Or your desired partition
-#SBATCH --nodes=4           # Request exactly 2 nodes
+#SBATCH --nodes=2           # Request exactly 2 nodes
 #SBATCH --ntasks-per-node=1 # Run one main task per node (for ray start)
 #SBATCH --gres=gpu:8        # 8 GPUs per node
 #SBATCH --cpus-per-task=64  # 16 CPUs per node (ensure nodes have this many cores available)
@@ -13,12 +13,12 @@
 #SBATCH --account=aviralku
 
 # --- Configuration ---
-RAY_PORT=6379            # Default Ray port
-RAY_DASHBOARD_PORT=8265 # Default Ray dashboard port
+RAY_PORT=6379            # Default Ray port 6379
+RAY_DASHBOARD_PORT=8266 # Default Ray dashboard port 8265
 # Define the absolute path to the working directory for the job
 JOB_WORKING_DIR="/home/asetlur/math-curriculum"
 # Define the script to run *relative to the working directory*
-JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_16k.sh"
+JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_run_7k.sh"
 
 # --- Setup ---
 echo "Running on nodes: $SLURM_JOB_NODELIST"

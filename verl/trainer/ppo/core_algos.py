@@ -149,6 +149,52 @@ def compute_grpo_outcome_advantage(token_level_rewards: torch.Tensor,
     return scores, scores
 
 
+
+def compute_rft_longest_length_outcome(token_level_rewards: torch.Tensor,
+                                   response_mask: torch.Tensor,
+                                   index: np.ndarray,
+                                   epsilon: float = 1e-6):
+    """
+    Compute outcome for RFT, only awarding longest response.
+    Args:
+        token_level_rewards: `(torch.Tensor)`
+            shape: (bs, response_length)
+        response_mask: `(torch.Tensor)`
+            shape: (bs, response_length)
+    
+    Returns:
+        advantages: `(torch.Tensor)`
+            shape: (bs, response_length)
+        Returns: `(torch.Tensor)`
+            shape: (bs, response_length)
+    """
+    scores = token_level_rewards.sum(dim=-1)
+
+    id2score = defaultdict(list)
+    id2corlen = defaultdict(list)
+
+    with torch.no_grad():
+        bsz = scores.shape[0]
+        for i in range(bsz):
+            id2score[index[i]].append(scores[i])
+        for i in range(bsz):
+            if scores[i] > epsilon:
+                id2corlen[index[i]].append(response_mask[i].sum())
+        for i in range(bsz):
+            if scores[i] <= epsilon:
+                scores[i] = 0.
+            else:    
+                if response_mask[i].sum() == max(id2corlen[index[i]]):
+                    scores[i] = 1.0
+                else:
+                    scores[i] = 0.0
+
+        scores = scores.unsqueeze(-1) * response_mask
+
+    return scores, scores
+
+
+
 def compute_reinforce_plus_plus_baseline_outcome_advantage(token_level_rewards: torch.Tensor,
                                                            response_mask: torch.Tensor,
                                                            index: torch.Tensor,

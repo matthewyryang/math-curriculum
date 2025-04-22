@@ -26,7 +26,7 @@ def get_repeat_count(text):
     return len(re.findall(f'(?={pattern})', text))
 
 def is_terminated(text):
-    return "</answer>" in text
+    return "</answer>" in text or "\\boxed{" in text
 
 
 def process_rollout(rollout):
@@ -62,11 +62,13 @@ if __name__ == '__main__':
 
 
     import matplotlib.pyplot as plt
+    from transformers import AutoTokenizer
 
     rollout_names = list(processed_rollouts.keys())
     rollout_ids = [int(x.split("_")[0]) for x in rollout_names]
     sorted_indices = np.argsort(rollout_ids)
     rollout_names = np.array(rollout_names)[sorted_indices]
+    tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-R1-Distill-Qwen-7B")
 
     fig, axs = plt.subplots(len(rollout_names), 1, figsize=(10, 5 * len(rollout_names)))
 
@@ -74,8 +76,10 @@ if __name__ == '__main__':
         rollouts = processed_rollouts[rollout_name]
         repeats = np.array([rollout['repeats'] for rollout in rollouts if rollout['score']==0.0])
         terminated = np.array([rollout['terminated'] for rollout in rollouts if rollout['score']==0.0])
-        ax = axs[i]
-        ax.bar(['Repeats > 5', 'Terminated'], [sum(repeats > 5) / len(repeats), sum(terminated) / len(terminated)])
+        terminated_length = np.array([len(tokenizer.encode(rollout['output'])) for rollout in rollouts if rollout['terminated']==True])
+        ax = axs[i] if len(rollout_names) > 1 else axs
+        ax.bar(['Repeats > 5', 'Terminated', 'Terminated length'], [sum(repeats > 5) / len(repeats), sum(terminated) / len(terminated), np.mean(terminated_length)])
+        # ax.bar(['Repeats > 5', 'Terminated'], [sum(repeats > 5) / len(repeats), sum(terminated) / len(terminated)])
         ax.set_title(rollout_name)
 
     plt.tight_layout()

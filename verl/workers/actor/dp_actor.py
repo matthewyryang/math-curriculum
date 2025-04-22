@@ -300,6 +300,11 @@ class DataParallelPPOActor(BasePPOActor):
                         response_mask = response_mask * (advantages > 0).float()
                         metrics['actor/frac_trained_on'] = (response_mask.shape[0] - (response_mask.sum(dim=-1) == 0.).sum().item()) / response_mask.shape[0]
 
+                    if self.config.remove_truncated:
+                        response_mask = response_mask * (response_mask.sum(dim=-1) < response_length).unsqueeze(-1).float()
+                        metrics['actor/frac_trained_on'] = (response_mask.shape[0] - (response_mask.sum(dim=-1) == 0.).sum().item()) / response_mask.shape[0]
+
+
                     pg_loss, pg_clipfrac, ppo_kl, pg_clipfrac_lower = compute_policy_loss(
                         old_log_prob=old_log_prob,
                         log_prob=log_prob,

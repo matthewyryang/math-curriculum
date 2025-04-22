@@ -1,5 +1,5 @@
 import os
-from datasets import load_dataset
+from datasets import load_dataset, concatenate_datasets
 from typing import Dict, List, Optional, Any
 import argparse
 
@@ -7,18 +7,22 @@ import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--local_dir', default='/home/cmu/math-curriculum/data/math')
-    parser.add_argument('--remote_dir', default='nlile/hendrycks-MATH-benchmark')
-    parser.add_argument('--split', default='train')
-    parser.add_argument('--lower_level', default=1, type=int)
-    parser.add_argument('--upper_level', default=5, type=int)
+    parser.add_argument('--local_dir', default='/home/cmu/math-curriculum/data')
+    parser.add_argument('--remote_dir', default='d1shs0ap/math')
+    parser.add_argument('--split', default=['train'], nargs='+')
     
 
     args = parser.parse_args()
 
-    dataset = load_dataset(args.remote_dir, split=args.split).filter(
-        lambda x: args.lower_level <= x['level'] <= args.upper_level
-    )
+    datasets_to_load = args.split
+    datasets = []
+
+    for dataset_name in datasets_to_load:
+        datasets.append(load_dataset(args.remote_dir, split=dataset_name))
+
+    dataset = concatenate_datasets(datasets)
+        
+    print(f"Loaded dataset with {len(dataset)} examples.")
 
     def make_map_fn(split: str):
         """Create a mapping function to process dataset examples.
@@ -31,6 +35,8 @@ if __name__ == '__main__':
         """
         def process_fn(example: Dict[str, Any], idx: int) -> Optional[Dict[str, Any]]:
             question = example.pop('problem')
+            instruction = "Let's think step by step and output the final answer within \\boxed{}."
+            question = f"{question} {instruction}"
             answer = example.pop('answer')
 
             data = {
@@ -54,4 +60,4 @@ if __name__ == '__main__':
     
     dataset = dataset.map(function=make_map_fn(args.split), with_indices=True)
 
-    dataset.to_parquet(os.path.join(args.local_dir, f'{args.split}-{args.lower_level}-{args.upper_level}.parquet'))
+    dataset.to_parquet(os.path.join(args.local_dir, f'{"+".join(args.split)}.parquet'))

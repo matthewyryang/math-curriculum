@@ -1,9 +1,13 @@
 #!/bin/bash
 
 export VLLM_ATTENTION_BACKEND=XFORMERS
-export EXPERIMENT_NAME="qwen-2.5-math-1.5b-16k"
+export EXPERIMENT_NAME="sft16k-grpo16k-wEnt"
 # export MODEL_PATH="/project/flame/asetlur/hub/models--deepseek-ai--DeepSeek-R1-Distill-Qwen-1.5B/snapshots/ad9f0ae0864d7fbcd1cd905e3c6c5b069cc8b562"
-export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-Math-1.5B/snapshots/4a83ca6e4526a4f2da3aa259ec36c259f66b2ab2"
+# export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen2.5-Math-1.5B/snapshots/4a83ca6e4526a4f2da3aa259ec36c259f66b2ab2"
+
+# export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/grpo-8k-r1template-SFT1ksteps-openthoughts8k/global_step_200/actor/hf-format"
+# export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/grpo-8k-r1template-SFT1ksteps-openthoughts8k/global_step_100/actor/hf-format"
+export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-maxlen16k/global_step_3176"
 
 # Train over 4 nodes, 8 A100-80GB GPUs per node.
 source /home/asetlur/miniconda3/bin/activate verl 
@@ -12,8 +16,9 @@ python3 -m verl.trainer.main_ppo \
     data.train_files=$HOME/math-curriculum/data/train.parquet \
     data.val_files=$HOME/math-curriculum/data/test.parquet \
     data.train_batch_size=128 \
-    data.max_prompt_length=512 \
+    data.max_prompt_length=1200 \
     data.max_response_length=16384 \
+    data.prompt_template='r1' \
     data.filter_overlong_prompts=True \
     actor_rollout_ref.model.path=$MODEL_PATH \
     actor_rollout_ref.actor.optim.lr=1e-6 \
@@ -21,11 +26,12 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.actor.ppo_mini_batch_size=64 \
     actor_rollout_ref.actor.ppo_micro_batch_size=64 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \
+    actor_rollout_ref.actor.only_train_on_positive=False \
     actor_rollout_ref.actor.ppo_max_token_len_per_gpu=32768 \
     actor_rollout_ref.actor.use_kl_loss=True \
     actor_rollout_ref.actor.kl_loss_coef=0.001 \
     actor_rollout_ref.actor.kl_loss_type=low_var_kl \
-    actor_rollout_ref.actor.entropy_coeff=0 \
+    actor_rollout_ref.actor.entropy_coeff=0.001 \
     actor_rollout_ref.model.enable_gradient_checkpointing=True \
     actor_rollout_ref.actor.fsdp_config.param_offload=False \
     actor_rollout_ref.actor.fsdp_config.optimizer_offload=False \
@@ -49,6 +55,6 @@ python3 -m verl.trainer.main_ppo \
     trainer.val_before_train=True \
     trainer.n_gpus_per_node=8 \
     trainer.nnodes=4 \
-    trainer.save_freq=99 \
-    trainer.test_freq=24 \
+    trainer.save_freq=100 \
+    trainer.test_freq=25 \
     trainer.total_epochs=2 "${@:1}" > /home/asetlur/math-curriculum/logs/$EXPERIMENT_NAME.log 2>&1

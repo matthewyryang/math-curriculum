@@ -24,14 +24,43 @@ def check_number_of_verifcation(text):
     
 
 
-def transform_record(dataset_record):
+# def transform_record(dataset_record):
+#     problem = dataset_record["conversations"][0]["value"]
+#     completion = dataset_record["conversations"][1]["value"]
+#     prompt = r1_prompt_template(problem)
+#     completion = completion.replace('<|end_of_solution|>', '</answer>')
+#     completion = completion.replace('<|begin_of_solution|>', '<answer>')
+#     completion = completion.replace('<|begin_of_thought|>', '<think>')
+#     completion = completion.replace('<|end_of_thought|>', '</think>')
+#     return {
+#         'prompt': prompt,
+#         'completion': completion
+#     }
+    
+
+def qwen_prompt_template(problem):
+    try:
+        problem = problem.split('your final response within \\boxed{}. ')[1]
+        problem = problem + " Let's think step by step and output the final answer within \\boxed{}."
+        return problem
+    except:
+        return None
+    
+def transform_record(dataset_record, tokenizer):
     problem = dataset_record["conversations"][0]["value"]
     completion = dataset_record["conversations"][1]["value"]
-    prompt = r1_prompt_template(problem)
-    completion = completion.replace('<|end_of_solution|>', '</answer>')
-    completion = completion.replace('<|begin_of_solution|>', '<answer>')
-    completion = completion.replace('<|begin_of_thought|>', '<think>')
+    
+    problem = qwen_prompt_template(problem)
+    if problem is None:
+        return None
+    prompt = [{"role": "user", "content": problem}]
+    prompt = tokenizer.apply_chat_template(prompt, add_generation_prompt=True, tokenize=False)
+    
+    completion = completion.replace('<|end_of_solution|>', '')
+    completion = completion.replace('<|begin_of_solution|>', '')
+    completion = completion.replace('<|begin_of_thought|>', '')
     completion = completion.replace('<|end_of_thought|>', '</think>')
+    
     return {
         'prompt': prompt,
         'completion': completion
@@ -39,30 +68,33 @@ def transform_record(dataset_record):
     
 
 
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--num_samples", type=int, default=100000, help="No. of samples")
-    parser.add_argument("--max_length", type=int, default=17900, help="Max length of the prompt + completion")
-    parser.add_argument("--save_location", type=str, default="/project/flame/asetlur/data/OpenThoughts-114k-r1-format-maxlen2k", help="Save location for the transformed dataset")
+    parser.add_argument("--num_samples", type=int, default=120000, help="No. of samples")
+    parser.add_argument("--max_length", type=int, default=3000, help="Max length of the prompt + completion")
+    parser.add_argument("--save_location", type=str, default="/project/flame/asetlur/OpenThoughts-114k-qwen-format-maxlen2k", help="Save location for the transformed dataset")
     args = parser.parse_args()
 
     # Load the dataset
     ds = load_dataset("open-thoughts/OpenThoughts-114k", "default")
-    print(f"Dataset size: {len(ds['train'])}")
-    total = len(ds['train'])
+    filtered_ds = [ds['train'][idx] for idx in range(len(ds['train'])) if "python function" not in ds['train'][idx]['conversations'][0]['value'].lower()]
+    print(f"Dataset size: {len(filtered_ds)}")
+    total = len(filtered_ds)
     
     indices = list(range(total))
     random.shuffle(indices)
     top_indices = indices[:args.num_samples]
+    tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B")
     
     # Transform the dataset
     transformed_ds = [
         transform_record(
-             dataset_record=ds["train"][idx]) 
+             dataset_record=filtered_ds[idx], tokenizer=tokenizer) 
              for idx in tqdm(top_indices, total=len(top_indices))]
+    transformed_ds = [record for record in transformed_ds if record is not None]
     
-    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-Math-1.5B")
 
 
     def get_encoded_lengths(record, tokenizer):
@@ -84,7 +116,7 @@ if __name__ == "__main__":
     selected_transformed_ds = [transformed_ds[i] for i in selected_indices]
 
     # Split the dataset into train and test sets
-    train_size = int(0.9 * len(selected_transformed_ds))
+    train_size = int(0.95 * len(selected_transformed_ds))
     train_set = selected_transformed_ds[:train_size]
     test_set = selected_transformed_ds[train_size:]
 
