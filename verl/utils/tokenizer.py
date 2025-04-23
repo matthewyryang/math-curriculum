@@ -50,6 +50,12 @@ def qwen_template(question: str):
 def empty_template(question: str):
     return question
 
+def simple_template(question: str):
+    return """Question:
+""" + question + """
+Answer:
+Let's think step by step.
+"""
 
 def hf_tokenizer(name_or_path, correct_pad_token=True, correct_gemma2=True, **kwargs):
     """Create a huggingface pretrained tokenizer which correctness handles eos and pad tokens.
@@ -78,9 +84,9 @@ def hf_tokenizer(name_or_path, correct_pad_token=True, correct_gemma2=True, **kw
     
     def custom_apply_chat_template(prompt, add_generation_prompt=False, tokenize=False):
         if tokenize:
-            return tokenizer.encode(empty_template(prompt[0]["content"]))
+            return tokenizer.encode(simple_template(prompt[0]["content"]))
         else:
-            return empty_template(prompt[0]["content"])
+            return simple_template(prompt[0]["content"])
     
     tokenizer.apply_chat_template = custom_apply_chat_template
     

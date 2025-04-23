@@ -655,7 +655,6 @@ class RayPPOTrainer(object):
             )
 
         # save rollouts as json
-        # save rollouts as json
         if self.config.trainer.default_local_dir is not None:
             hdfs_io.makedirs(self.config.trainer.default_local_dir, exist_ok=True)
         rollouts_json = json.dumps(rollouts)
