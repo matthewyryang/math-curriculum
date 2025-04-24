@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=ray-single
+#SBATCH --job-name=generate-data
 #SBATCH --partition=flame # Or your desired partition
 #SBATCH --nodes=1           # Request exactly 2 nodes
 #SBATCH --ntasks-per-node=1 # Run one main task per node (for ray start)
@@ -12,11 +12,7 @@
 #SBATCH --qos=flame-t2_g1_qos
 #SBATCH --account=aviralku
 
-# --- Configuration ---
-# Define the absolute path to the working directory for the job
 JOB_WORKING_DIR="/home/asetlur/math-curriculum"
-# Define the script to run *relative to the working directory*
-JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_run.sh"
 
 # --- Setup ---
 echo "Running on nodes: $SLURM_JOB_NODELIST"
@@ -24,5 +20,9 @@ echo "Job ID: $SLURM_JOB_ID"
 echo "GPUs per node: $SLURM_GPUS_ON_NODE" # Verify Slurm is parsing --gres correctly
 echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
 
+
 cd $JOB_WORKING_DIR
-sh -c "exec bash $JOB_SCRIPT_NAME"
+
+python convert_fsdp_to_hf.py /project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-SFTon16k-qwen-format/global_step_200/actor/ /project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-SFTon16k-qwen-format/global_step_200/actor/huggingface/ /project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-SFTon16k-qwen-format/global_step_200/actor/hf-format/
+
+#python generate_sft_data_from_openthoughts.py
