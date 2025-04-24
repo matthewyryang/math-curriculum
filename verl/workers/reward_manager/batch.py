@@ -90,10 +90,11 @@ class BatchRewardManager:
 
             data_source = data_sources[i]
             if already_printed.get(data_source, 0) < self.num_examine:
-                response_str = self.tokenizer.decode(data.batch['responses'][i][:length], skip_special_tokens=True)
-                prompt_str = self.tokenizer.decode(data.batch['prompts'][i], skip_special_tokens=True)
+                response_str = self.tokenizer.decode(data.batch['responses'][i][:length], skip_special_tokens=False)
+                prompt_str = self.tokenizer.decode(data.batch['prompts'][i], skip_special_tokens=False)
                 ground_truth = data[i].non_tensor_batch['reward_model'].get('ground_truth', None)
                 print("[prompt]", prompt_str)
+
                 print("[response]", response_str)
                 print("[ground_truth]", ground_truth)
                 print("[score]", scores[i])
