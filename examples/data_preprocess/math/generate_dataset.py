@@ -7,9 +7,9 @@ import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--local_dir', default='/home/cmu/math-curriculum/data')
+    parser.add_argument('--local_dir', default='/home/anikait.singh/rl_behaviors_verl_stable/data_deepscaler_amrith_math')
     parser.add_argument('--remote_dir', default='d1shs0ap/math')
-    parser.add_argument('--split', default=['train'], nargs='+')
+    parser.add_argument('--split', default=['test'], nargs='+')
     
 
     args = parser.parse_args()

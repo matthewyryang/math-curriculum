@@ -1,22 +1,14 @@
-#!/bin/bash
+set -x
 
-export EXPERIMENT_NAME="8klen-q1.5r1dist-cr0.4"
-
-# export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-qwenformat-maxlen16k/global_step_2518"
-# export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-qwenformat-maxlen2k/global_step_630"
-
-export MODEL_PATH="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
-
-source /home/asetlur/miniconda3/bin/activate verl 
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
-    data.train_files=$HOME/math-curriculum/data/train.parquet \
-    data.val_files=$HOME/math-curriculum/data/test.parquet \
+    data.train_files=$TRAIN_DATA_DIR/train.parquet \
+    data.val_files=$EVAL_DATA_DIR/test.parquet \
     data.train_batch_size=128 \
-    data.max_prompt_length=1024 \
-    data.max_response_length=8192 \
+    data.max_prompt_length=$MAX_PROMPT_LENGTH \
+    data.max_response_length=$MAX_MODEL_LEN \
     data.filter_overlong_prompts=True \
-    actor_rollout_ref.model.path=$MODEL_PATH \
+    actor_rollout_ref.model.path=$BASE_MODEL \
     actor_rollout_ref.actor.optim.lr=1e-6 \
     actor_rollout_ref.model.use_remove_padding=True \
     actor_rollout_ref.actor.clip_ratio=0.4 \
@@ -48,12 +40,14 @@ python3 -m verl.trainer.main_ppo \
     custom_reward_function.path=verl/utils/reward_score/curriculum_math/compute_score.py \
     trainer.critic_warmup=0 \
     trainer.logger=['console','wandb'] \
-    trainer.project_name=Math \
+    trainer.project_name=$PROJECT_NAME \
     trainer.experiment_name=$EXPERIMENT_NAME \
     trainer.val_before_train=True \
-    trainer.n_gpus_per_node=8 \
+    trainer.default_hdfs_dir=null \
+    trainer.n_gpus_per_node=$N_GPUS \
     trainer.nnodes=1 \
     trainer.save_freq=100 \
     trainer.test_freq=25 \
     trainer.total_training_steps=501 \
-    trainer.total_epochs=2 "${@:1}" > /home/asetlur/math-curriculum/logs/$EXPERIMENT_NAME.log 2>&1
+    trainer.default_local_dir=/home/anikait.singh/rl_behaviors_verl_stable/ppo/$EXPERIMENT_NAME \
+    trainer.total_epochs=$EPOCHS $@
