@@ -1,5 +1,5 @@
 
-export CONTEXT_LENGTH=8192
+export CONTEXT_LENGTH=2048
 export BASE_MODEL=Qwen/Qwen2.5-Math-1.5B
 
 for dist in "train-1-5" "train-3-5"; do
