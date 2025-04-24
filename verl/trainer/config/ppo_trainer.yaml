@@ -37,8 +37,8 @@ actor_rollout_ref:
     remove_truncated: False
     # pg_losses2 = -advantages * torch.clamp(ratio, 1 - cliprange_low, 1 + cliprange_high)
     clip_ratio: 0.2 # default value if clip_ratio_low and clip_ratio_high are not specified
-    clip_ratio_low: None
-    clip_ratio_high: None
+    clip_ratio_low: null
+    clip_ratio_high: null
     clip_ratio_c: 3.0 # lower bound of the value for Dual-clip PPO from https://arxiv.org/pdf/1912.09729
     loss_agg_mode: "token-mean" # / "seq-mean-token-sum" / "seq-mean-token-mean"
     entropy_coeff: 0.001
