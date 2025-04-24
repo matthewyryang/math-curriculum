@@ -105,15 +105,15 @@ class RLHFDataset(Dataset):
 
         self.return_raw_chat = return_raw_chat
         self.chat_template_func = chat_template_func
-        # if self.chat_template_func is not None:
-        #     def custom_apply_chat_template(prompt, add_generation_prompt=False, tokenize=False):
-        #         if tokenize:
-        #             return self.tokenizer.encode(self.chat_template_func(prompt[0]["content"]))
-        #         else:
-        #             return self.chat_template_func(prompt[0]["content"])
-        #     assert callable(self.chat_template_func), "chat_template_func must be a callable function"
-        #     self.tokenizer.apply_chat_template = custom_apply_chat_template
-        #     print("Using custom chat template function for tokenizer:", self.chat_template_func)
+        if self.chat_template_func is not None:
+            def custom_apply_chat_template(prompt, add_generation_prompt=False, tokenize=False):
+                if tokenize:
+                    return self.tokenizer.encode(self.chat_template_func(prompt[0]["content"]))
+                else:
+                    return self.chat_template_func(prompt[0]["content"])
+            assert callable(self.chat_template_func), "chat_template_func must be a callable function"
+            self.tokenizer.apply_chat_template = custom_apply_chat_template
+            print("Using custom chat template function for tokenizer:", self.chat_template_func)
         
         self.truncation = truncation
         self.filter_overlong_prompts = filter_overlong_prompts

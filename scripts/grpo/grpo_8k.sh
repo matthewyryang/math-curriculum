@@ -1,10 +1,10 @@
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
-    data.train_files=$HOME/math-curriculum/data/deepscaler/$DATA_DISTRIBUTION.parquet \
-    data.val_files=$HOME/math-curriculum/data/deepscaler/test.parquet \
-    data.train_batch_size=64 \
-    data.max_prompt_length=1024 \
-    data.max_response_length=8192 \
+    data.train_files=$HOME/math-curriculum/data/$DATA_DISTRIBUTION.parquet \
+    data.val_files=$HOME/math-curriculum/data/test.parquet \
+    data.train_batch_size=128 \
+    data.max_prompt_length=512 \
+    data.max_response_length=$CONTEXT_LENGTH \
     data.filter_overlong_prompts=True \
     actor_rollout_ref.model.path=$BASE_MODEL \
     actor_rollout_ref.actor.optim.lr=1e-6 \
@@ -27,7 +27,6 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.max_num_batched_tokens=16384 \
     actor_rollout_ref.rollout.n=8 \
     actor_rollout_ref.rollout.val_kwargs.n=8 \
-    actor_rollout_ref.rollout.val_kwargs.do_sample=True \
     actor_rollout_ref.ref.fsdp_config.param_offload=True \
     actor_rollout_ref.rollout.enforce_eager=False \
     actor_rollout_ref.rollout.free_cache_engine=False \
@@ -38,9 +37,8 @@ python3 -m verl.trainer.main_ppo \
     trainer.project_name=Math \
     trainer.experiment_name=$EXPERIMENT_NAME \
     trainer.val_before_train=True \
-    trainer.n_gpus_per_node=$GPUS \
+    trainer.n_gpus_per_node=8 \
     trainer.nnodes=1 \
-    trainer.save_freq=-1 \
-    trainer.test_freq=25 \
-    trainer.default_local_dir=/home/cmu/math-curriculum/rollouts/$EXPERIMENT_NAME \
-    trainer.total_epochs=$EPOCHS $@
+    trainer.save_freq=99 \
+    trainer.test_freq=24 \
+    trainer.total_epochs=2 $@

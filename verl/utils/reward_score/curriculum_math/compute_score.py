@@ -13,11 +13,11 @@ def compute_score(data_source, solution_str, ground_truth, extra_info):
 
         model_response = solution_str
         
-        # Extract solution.
-        # if THOUGHT_DELIMITER_END in model_response:
-        #     model_solution = model_response.split(THOUGHT_DELIMITER_END)[1]
-        # else:
-        #     return 0.
+        # # Extract solution.
+        if THOUGHT_DELIMITER_END in model_response:
+            model_solution = model_response.split(THOUGHT_DELIMITER_END)[1]
+        else:
+            return 0.
         model_solution = model_response
         
         model_answer = extract_answer(model_solution)
