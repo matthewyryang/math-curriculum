@@ -5,6 +5,7 @@ python3 -m verl.trainer.main_ppo \
     data.train_batch_size=128 \
     data.max_prompt_length=512 \
     data.max_response_length=$CONTEXT_LENGTH \
+    data.max_extrapolation_length=$((2 * CONTEXT_LENGTH)) \
     data.filter_overlong_prompts=True \
     actor_rollout_ref.model.path=$BASE_MODEL \
     actor_rollout_ref.actor.optim.lr=1e-6 \

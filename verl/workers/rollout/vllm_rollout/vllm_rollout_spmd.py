@@ -94,11 +94,11 @@ class vLLMRollout(BaseRollout):
             vllm_ps.initialize_parallel_state(tensor_model_parallel_size=tensor_parallel_size,
                                               num_tp_per_train_tp=num_tp_per_train_tp)
 
-        assert model_hf_config.max_position_embeddings >= config.prompt_length + config.response_length, \
+        assert model_hf_config.max_position_embeddings >= config.prompt_length + config.extrapolation_length, \
             "model context length should be greater than total sequence length"
 
         max_model_len = self.config.max_model_len if self.config.max_model_len \
-                        else config.prompt_length + config.response_length
+                        else config.prompt_length + config.extrapolation_length
         max_model_len = int(max_model_len)
 
         if max_num_batched_tokens < max_model_len and self.config.enable_chunked_prefill:
@@ -213,6 +213,7 @@ class vLLMRollout(BaseRollout):
 
         do_sample = prompts.meta_info.get('do_sample', True)
         is_validate = prompts.meta_info.get('validate', False)
+        extrapolate = prompts.meta_info.get('extrapolate', False)
         if not do_sample:
             kwargs = {
                 'best_of': 1,
@@ -220,7 +221,8 @@ class vLLMRollout(BaseRollout):
                 'top_k': -1,
                 'min_p': 0.0,
                 'temperature': 0,
-                'n': 1  # if greedy, only 1 response
+                'n': 1,  # if greedy, only 1 response
+                'max_tokens': self.config.extrapolation_length if extrapolate else self.config.response_length,
             }
         elif is_validate:
             # TODO: try **
@@ -229,6 +231,7 @@ class vLLMRollout(BaseRollout):
                 'top_p': self.config.val_kwargs.top_p,
                 'temperature': self.config.val_kwargs.temperature,
                 'n': 1,  # if validate, already repeat in ray_trainer
+                'max_tokens': self.config.extrapolation_length if extrapolate else self.config.response_length,
             }
 
         # users can customize different sampling_params at different run

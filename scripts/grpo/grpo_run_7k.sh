@@ -27,6 +27,7 @@ python3 -m verl.trainer.main_ppo \
     data.train_batch_size=128 \
     data.max_prompt_length=1024 \
     data.max_response_length=8192 \
+    data.max_extrapolation_length=16384 \
     data.filter_overlong_prompts=True \
     actor_rollout_ref.model.path=$MODEL_PATH \
     actor_rollout_ref.actor.optim.lr=1e-6 \
