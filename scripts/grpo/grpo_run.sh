@@ -1,11 +1,11 @@
 #!/bin/bash
 
-export EXPERIMENT_NAME="8klen-q1.5r1dist-cr0.4"
+export EXPERIMENT_NAME="8klen-q1.5sft16k-cr0.3-dualclip-bs32"
 
-# export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-qwenformat-maxlen16k/global_step_2518"
+export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-qwenformat-maxlen16k/global_step_2518"
 # export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-qwenformat-maxlen2k/global_step_630"
-
-export MODEL_PATH="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+# export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-maxlen8k-on-qwenr1distill/global_step_1092"
+# export MODEL_PATH="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
 
 source /home/asetlur/miniconda3/bin/activate verl 
 python3 -m verl.trainer.main_ppo \
@@ -19,9 +19,9 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.model.path=$MODEL_PATH \
     actor_rollout_ref.actor.optim.lr=1e-6 \
     actor_rollout_ref.model.use_remove_padding=True \
-    actor_rollout_ref.actor.clip_ratio=0.4 \
-    actor_rollout_ref.actor.ppo_mini_batch_size=64 \
-    actor_rollout_ref.actor.ppo_micro_batch_size=64 \
+    actor_rollout_ref.actor.clip_ratio=0.3 \
+    actor_rollout_ref.actor.ppo_mini_batch_size=32 \
+    actor_rollout_ref.actor.ppo_micro_batch_size=32 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \
     actor_rollout_ref.actor.only_train_on_positive=False \
     actor_rollout_ref.actor.remove_truncated=False \
@@ -38,6 +38,7 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.name=vllm \
     actor_rollout_ref.rollout.temperature=0.6 \
     actor_rollout_ref.rollout.val_kwargs.temperature=0.6 \
+    actor_rollout_ref.rollout.val_kwargs.do_sample=True \
     actor_rollout_ref.rollout.gpu_memory_utilization=0.8 \
     actor_rollout_ref.rollout.n=8 \
     actor_rollout_ref.rollout.val_kwargs.n=8 \
