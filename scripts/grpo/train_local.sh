@@ -12,17 +12,17 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
-    deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
-    deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
-    deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
+    Qwen/Qwen3-1.7B-Base
+    Qwen/Qwen3-1.7B-Base
+    Qwen/Qwen3-1.7B-Base
+    Qwen/Qwen3-1.7B-Base
 )
 num_models=${#models[@]}
 names=(
-    aime-deepseekdistill-grpo-8k-aime-nokl-n16
-    aime-deepseekdistill-grpo-8k-omnimath-nokl-n16
-    aime-deepseekdistill-grpo-8k-dapo-nokl-n16
-    aime-deepseekdistill-grpo-8k-deepscaler-nokl-n16
+    aime-qwen3-17b-grpo-8k-aime-n16
+    aime-qwen3-17b-grpo-8k-omnimath-n16
+    aime-qwen3-17b-grpo-8k-dapo-n16
+    aime-qwen3-17b-grpo-8k-deepscaler-n16
 )
 num_names=${#names[@]}
 
@@ -50,7 +50,7 @@ gpus=(
 )
 num_gpus=${#gpus[@]}
 
-PROJECT_NAME='verl_stable_grpo_codev2_nokl_n16_0429'
+PROJECT_NAME='verl_stable_grpo_qwen3_17b_n16_0501'
 
 
 if [ $num_models -ne $num_names ]; then
@@ -108,9 +108,9 @@ for i in $(seq 0 $((num_models-1))); do
     export PROJECT_NAME=$PROJECT_NAME
     export MAX_MODEL_LEN=8192
     export MAX_PROMPT_LENGTH=1024
-    export EPOCHS=30
+    export EPOCHS=2
 
-    command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_nokl.sh"
+    command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_dualclip.sh"
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"
     echo $command
     if [ $dry_run = true ]; then

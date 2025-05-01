@@ -23,19 +23,20 @@ train_batch_size=64
 max_length=8192
 
 total_epochs=5
+# total_epochs=3
 logger="['console','wandb']"
 truncation="right"
 apply_chat_template=False
 
 model_names=(
-  'Qwen/Qwen2.5-1.5B'
+  'Qwen/Qwen2.5-3B'
   'Qwen/Qwen2.5-Math-1.5B'
   'Qwen/Qwen2.5-Math-1.5B'
 )
 num_model_names=${#model_names[@]}
 
 project_names=(
-  'insight-warmstart-sft-qwen25-15b-0501'
+  'insight-warmstart-sft-qwen25-3b-0501'
   'hint-warmstart-sft-qwen25-15b-0501'
   'hint-warmstart-sft-qwen25-15b-0501'
 )
@@ -49,9 +50,9 @@ base_data_paths=(
 num_base_data_paths=${#base_data_paths[@]}
 
 experiment_names=(
-  'insight-warmstart-sft-qwen25-15b-0501'
-  'hint_gen_sft-qwen25-15b-lr1e5-bsz64-maxlen8k-0501'
-  'hint_cond_sol_gen_sft-qwen25-15b-lr1e5-bsz64-maxlen8k-0501'
+  'insight-warmstart-sft-qwen25-3b-3epoch-0501'
+  'hint_gen_sft-qwen25-15b-3epoch-lr1e5-bsz64-maxlen8k-0501'
+  'hint_cond_sol_gen_sft-qwen25-15b-3epoch-lr1e5-bsz64-maxlen8k-0501'
 )
 num_experiment_names=${#experiment_names[@]}
 

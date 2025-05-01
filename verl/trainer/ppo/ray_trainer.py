@@ -631,17 +631,20 @@ class RayPPOTrainer(object):
             if 'level' in test_batch.non_tensor_batch:
                 difficulties.extend(list(test_batch.non_tensor_batch['level']))
             else:
-                ref_rewards = list(test_batch.non_tensor_batch['reward'])
-                def return_difficulty(ref_model_reward):
-                    difficulty = 'unknown'
-                    if ref_model_reward > 10 / 16:
-                        difficulty = 'easy'
-                    elif ref_model_reward == 0:
-                        difficulty = 'hard'
-                    else:
-                        difficulty = 'medium'
-                    return difficulty
-                difficulties.extend([return_difficulty(ref_reward) for ref_reward in ref_rewards])
+                try:
+                    ref_rewards = list(test_batch.non_tensor_batch['reward'])
+                    def return_difficulty(ref_model_reward):
+                        difficulty = 'unknown'
+                        if ref_model_reward > 10 / 16:
+                            difficulty = 'easy'
+                        elif ref_model_reward == 0:
+                            difficulty = 'hard'
+                        else:
+                            difficulty = 'medium'
+                        return difficulty
+                    difficulties.extend([return_difficulty(ref_reward) for ref_reward in ref_rewards])
+                except:
+                    difficulties.extend(['unknown'] * len(sample_inputs))
             lengths.extend(map(lambda text: len(self.tokenizer.encode(text)), output_texts))
 
         self._maybe_log_val_generations(inputs=sample_inputs, outputs=sample_outputs, scores=sample_scores)
