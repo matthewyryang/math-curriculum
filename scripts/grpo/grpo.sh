@@ -1,10 +1,11 @@
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
     data.train_files=$HOME/math-curriculum/data/math/$DATA_DISTRIBUTION.parquet \
-    data.val_files=$HOME/math-curriculum/data/math/test-1-5.parquet \
+    data.val_files=$HOME/math-curriculum/data/math/test.parquet \
     data.train_batch_size=128 \
     data.max_prompt_length=512 \
     data.max_response_length=$CONTEXT_LENGTH \
+    data.max_extrapolation_length=$((2 * CONTEXT_LENGTH)) \
     data.filter_overlong_prompts=True \
     actor_rollout_ref.model.path=$BASE_MODEL \
     actor_rollout_ref.actor.optim.lr=1e-6 \
@@ -31,6 +32,7 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.free_cache_engine=False \
     algorithm.use_kl_in_reward=False \
     custom_reward_function.path=verl/utils/reward_score/curriculum_math/compute_score.py \
+    trainer.default_local_dir=/home/cmu/math-curriculum/checkpoints/$EXPERIMENT_NAME \
     trainer.critic_warmup=0 \
     trainer.logger=['console','wandb'] \
     trainer.project_name=Math \

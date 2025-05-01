@@ -2,7 +2,7 @@ export CONTEXT_LENGTH=2048
 # export BASE_MODEL=Qwen/Qwen2.5-Math-1.5B
 export BASE_MODEL=deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
 
-export DATA_DISTRIBUTION="train-3-5"
+export DATA_DISTRIBUTION="train"
 export EXPERIMENT_NAME="$DATA_DISTRIBUTION-$CONTEXT_LENGTH"
 export EPOCHS=8
 

@@ -53,7 +53,7 @@ echo "Starting Ray head node on $head_node..."
 # Use SLURM_CPUS_PER_TASK and SLURM_GPUS_ON_NODE which Slurm should set based on --cpus-per-task and --gres
 # Note: --gres=gpu:8 with --ntasks-per-node=1 should result in SLURM_GPUS_ON_NODE=8
 srun --export=ALL --nodes=1 --ntasks=1 -w "$head_node" \
-    /home/asetlur/miniconda3/envs/verl/bin/ray start --head --node-ip-address="$head_node_ip" --port=$RAY_PORT --dashboard-host=0.0.0.0 --dashboard-port=$RAY_DASHBOARD_PORT \
+    /project/flame/asetlur/miniconda3/envs/verl/bin/ray start --head --node-ip-address="$head_node_ip" --port=$RAY_PORT --dashboard-host=0.0.0.0 --dashboard-port=$RAY_DASHBOARD_PORT \
     --num-cpus=$SLURM_CPUS_PER_TASK --num-gpus=$SLURM_GPUS_ON_NODE \
     --block &
 head_pid=$! # Store PID if needed for explicit kill later (optional)
@@ -66,7 +66,7 @@ worker_pids=()
 for worker_node in "${worker_nodes[@]}"; do
     echo "Starting worker on $worker_node"
     srun --export=ALL --nodes=1 --ntasks=1 -w "$worker_node" \
-        /home/asetlur/miniconda3/envs/verl/bin/ray start --address="$head_node_ip:$RAY_PORT" \
+        /project/flame/asetlur/miniconda3/envs/verl/bin/ray start --address="$head_node_ip:$RAY_PORT" \
         --num-cpus=$SLURM_CPUS_PER_TASK --num-gpus=$SLURM_GPUS_ON_NODE \
         --block &
     worker_pids+=($!) # Store worker PIDs (optional)
@@ -82,7 +82,7 @@ sleep 20 # Increased sleep time, adjust as needed
 # --- Optional: Check Cluster Status ---
 echo "Checking Ray cluster status..."
 # Run status check directly, as srun might still fail here if nodes are busy initializing
-/home/asetlur/miniconda3/envs/verl/bin/ray status || echo "WARNING: Ray status check failed or cluster not fully ready yet."
+/project/flame/asetlur/miniconda3/envs/verl/bin/ray status || echo "WARNING: Ray status check failed or cluster not fully ready yet."
 sleep 5
 
 # --- Submit Ray Job ---
@@ -96,9 +96,9 @@ echo "Submitting Ray job: $JOB_SCRIPT_NAME from $JOB_WORKING_DIR"
 #     --block &
 
 # job_submit_status=$(srun --export=ALL --nodes=1 --ntasks=1 -w "$head_node" \
-#     /home/asetlur/miniconda3/envs/verl/bin/ray job submit --address="http://127.0.0.1:8265"  --no-wait --runtime-env $JOB_WORKING_DIR/runtime_env.yaml sh -c "cd $JOB_WORKING_DIR && exec bash $JOB_SCRIPT_NAME")
+#     /project/flame/asetlur/miniconda3/envs/verl/bin/ray job submit --address="http://127.0.0.1:8265"  --no-wait --runtime-env $JOB_WORKING_DIR/runtime_env.yaml sh -c "cd $JOB_WORKING_DIR && exec bash $JOB_SCRIPT_NAME")
 
-/home/asetlur/miniconda3/envs/verl/bin/ray job submit --address="http://$head_node_ip:$RAY_DASHBOARD_PORT" \
+/project/flame/asetlur/miniconda3/envs/verl/bin/ray job submit --address="http://$head_node_ip:$RAY_DASHBOARD_PORT" \
   --no-wait \
   --runtime-env $JOB_WORKING_DIR/runtime_env.yaml \
   -- sh -c "exec bash $JOB_SCRIPT_NAME"

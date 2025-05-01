@@ -23,6 +23,5 @@ echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
 
 cd $JOB_WORKING_DIR
 
-python convert_fsdp_to_hf.py /project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-SFTon16k-qwen-format/global_step_200/actor/ /project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-SFTon16k-qwen-format/global_step_200/actor/huggingface/ /project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-SFTon16k-qwen-format/global_step_200/actor/hf-format/
-
+python convert_fsdp_to_hf.py /project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-q1.5sft16k-cr0.3-dualclip-bs32/global_step_300/actor/ /project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-q1.5sft16k-cr0.3-dualclip-bs32/global_step_300/actor/huggingface/ /project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-q1.5sft16k-cr0.3-dualclip-bs32/global_step_300/actor/hf-format/
 #python generate_sft_data_from_openthoughts.py

@@ -172,6 +172,7 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
     correct_lengths_by_difficulty = defaultdict(list)
     incorrect_lengths_by_difficulty = defaultdict(list)
     rewards_by_difficulty = defaultdict(list)
+    zero_advantage_ratio_by_difficulty = defaultdict(list)
 
     if 'level' not in batch.non_tensor_batch:
         try:
@@ -193,7 +194,7 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
     else:
         diffulties = batch.non_tensor_batch['level']
 
-    for difficulty, reward, length, v_cnt in zip(diffulties, sequence_reward, response_length, verification_cnts):
+    for difficulty, reward, length, v_cnt, adv, mask in zip(diffulties, sequence_reward, response_length, verification_cnts, advantages, response_mask):
         binary_reward = 1 if reward > 0.9 else 0
         
         rewards_by_difficulty[difficulty].append(binary_reward)
@@ -204,6 +205,8 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
             incorrect_lengths_by_difficulty[difficulty].append(length.detach().item())
             incorrect_verifications_by_difficulty[difficulty].append(v_cnt)
     
+        zero_advantage_ratio_by_difficulty[difficulty].extend(list(adv.detach() * mask.detach().float() == 0))
+
     for difficulty in rewards_by_difficulty:
         mean_reward = np.mean(rewards_by_difficulty[difficulty])
         mean_length = np.mean(correct_lengths_by_difficulty[difficulty] + incorrect_lengths_by_difficulty[difficulty])
@@ -232,6 +235,8 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
         metrics[f'difficulty/0_verification/{difficulty}'] = mean_incorrect_v_cnt
         metrics[f'difficulty/1_verification/{difficulty}'] = mean_correct_v_cnt
         metrics[f'difficulty/verification/{difficulty}'] = mean_v_cnt
+
+        metrics[f'difficulty/zero_advantage_ratio/{difficulty}'] = np.mean(zero_advantage_ratio_by_difficulty[difficulty])
 
     if (global_steps - 1) % test_freq == 0:
         # advantage histograms
