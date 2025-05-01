@@ -12,45 +12,30 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
-    deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
-    deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
-    deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
+    /home/anikait.singh/rl_behaviors_verl_stable/sft/insight-sft-lr1e5-bsz64-maxlen4k/global_step_50
 )
 num_models=${#models[@]}
 names=(
-    aime-deepseekdistill-grpo-8k-aime-nokl-n16
-    aime-deepseekdistill-grpo-8k-omnimath-nokl-n16
-    aime-deepseekdistill-grpo-8k-dapo-nokl-n16
-    aime-deepseekdistill-grpo-8k-deepscaler-nokl-n16
+    insight-grpo-sft1e5-bsz64-maxlen4k-50
 )
 num_names=${#names[@]}
 
 train_data_dirs=(
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_aime_math"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_omnimath"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_dapo_math"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_deepscaler_amrith_math"
+    "/home/anikait.singh/rl_behaviors_verl_stable/data_insights_rl"
 )
 num_train_data_dirs=${#train_data_dirs[@]}
 
 eval_data_dirs=(
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_aime2025_math"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_aime2025_math"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_aime2025_math"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_aime2025_math"
+    "/home/anikait.singh/rl_behaviors_verl_stable/data_insights_rl"
 )
 num_eval_data_dirs=${#eval_data_dirs[@]}
 
 gpus=(
-    "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
+    "0,1,2,3,4,5,6"
 )
 num_gpus=${#gpus[@]}
 
-PROJECT_NAME='verl_stable_grpo_codev2_nokl_n16_0429'
+PROJECT_NAME='verl_stable_insight_grpo_0501'
 
 
 if [ $num_models -ne $num_names ]; then
@@ -97,7 +82,7 @@ for i in $(seq 0 $((num_models-1))); do
         exit 1
     fi
 
-    export N_GPUS=8
+    export N_GPUS=7
     export BASE_MODEL=${models[$i]}
     export TRAIN_DATA_DIR=$curr_train_data_dir
     export EVAL_DATA_DIR=$curr_eval_data_dir
@@ -107,10 +92,10 @@ for i in $(seq 0 $((num_models-1))); do
     export CUDA_VISIBLE_DEVICES=${gpus[$i]}
     export PROJECT_NAME=$PROJECT_NAME
     export MAX_MODEL_LEN=8192
-    export MAX_PROMPT_LENGTH=1024
-    export EPOCHS=30
+    export MAX_PROMPT_LENGTH=4096
+    export EPOCHS=1
 
-    command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_nokl.sh"
+    command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_nokl_insight.sh"
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"
     echo $command
     if [ $dry_run = true ]; then
