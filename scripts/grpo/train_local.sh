@@ -108,7 +108,7 @@ for i in $(seq 0 $((num_models-1))); do
     export PROJECT_NAME=$PROJECT_NAME
     export MAX_MODEL_LEN=8192
     export MAX_PROMPT_LENGTH=1024
-    export EPOCHS=2
+    export EPOCHS=30
 
     command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_dualclip.sh"
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"

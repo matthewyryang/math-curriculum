@@ -12,11 +12,11 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    /home/anikait.singh/rl_behaviors_verl_stable/sft/insight-sft-lr1e5-bsz64-maxlen4k/global_step_50
+    /home/anikait.singh/rl_behaviors_verl_stable/sft/insight-warmstart-sft-qwen25-3b-3epoch-0501/global_step_30
 )
 num_models=${#models[@]}
 names=(
-    insight-grpo-sft1e5-bsz64-maxlen4k-50
+    insight-grpo-sft1e5-bsz64-maxlen4k-5
 )
 num_names=${#names[@]}
 
@@ -88,12 +88,12 @@ for i in $(seq 0 $((num_models-1))); do
     export EVAL_DATA_DIR=$curr_eval_data_dir
     export ROLLOUT_TP_SIZE=2
     export EXPERIMENT_NAME=${names[$i]}
-    # export VLLM_ATTENTION_BACKEND=XFORMERS
+    export VLLM_ATTENTION_BACKEND=XFORMERS
     export CUDA_VISIBLE_DEVICES=${gpus[$i]}
     export PROJECT_NAME=$PROJECT_NAME
-    export MAX_MODEL_LEN=8192
-    export MAX_PROMPT_LENGTH=4096
-    export EPOCHS=1
+    export MAX_MODEL_LEN=2048
+    export MAX_PROMPT_LENGTH=1280
+    export EPOCHS=30
 
     command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_nokl_insight.sh"
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"

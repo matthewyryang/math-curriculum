@@ -8,7 +8,7 @@ python3 -m verl.trainer.main_ppo \
     data.train_batch_size=112 \
     data.max_prompt_length=$MAX_PROMPT_LENGTH \
     data.max_response_length=$MAX_MODEL_LEN \
-    data.filter_overlong_prompts=False \
+    data.filter_overlong_prompts=True \
     actor_rollout_ref.model.path=$BASE_MODEL \
     actor_rollout_ref.actor.optim.lr=1e-6 \
     actor_rollout_ref.model.use_remove_padding=True \

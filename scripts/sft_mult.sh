@@ -20,41 +20,71 @@ response_key="completion"
 micro_batch_size=8
 micro_batch_size_per_gpu=1
 train_batch_size=64
-max_length=8192
 
 total_epochs=5
-# total_epochs=3
 logger="['console','wandb']"
 truncation="right"
 apply_chat_template=False
 
 model_names=(
-  'Qwen/Qwen2.5-3B'
-  'Qwen/Qwen2.5-Math-1.5B'
-  'Qwen/Qwen2.5-Math-1.5B'
+  'Qwen/Qwen3-1.7B-Base'
+  'Qwen/Qwen3-1.7B-Base'
+  'Qwen/Qwen3-1.7B-Base'
+  'Qwen/Qwen3-1.7B-Base'
+  'Qwen/Qwen3-1.7B-Base'
+  'Qwen/Qwen3-1.7B-Base'
 )
 num_model_names=${#model_names[@]}
 
 project_names=(
-  'insight-warmstart-sft-qwen25-3b-0501'
-  'hint-warmstart-sft-qwen25-15b-0501'
-  'hint-warmstart-sft-qwen25-15b-0501'
+  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
+  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
+  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
+  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
+  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
+  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
 )
 num_project_names=${#project_names[@]}
 
 base_data_paths=(
-  '/home/anikait.singh/rl_behaviors_verl_stable/data_insights_sft'
-  '/home/anikait.singh/rl_behaviors_verl_stable/hint_gen_sft'
-  '/home/anikait.singh/rl_behaviors_verl_stable/hint_cond_sol_gen_sft'
+  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
+  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
+  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
+  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
+  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
+  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
 )
 num_base_data_paths=${#base_data_paths[@]}
 
 experiment_names=(
-  'insight-warmstart-sft-qwen25-3b-3epoch-0501'
-  'hint_gen_sft-qwen25-15b-3epoch-lr1e5-bsz64-maxlen8k-0501'
-  'hint_cond_sol_gen_sft-qwen25-15b-3epoch-lr1e5-bsz64-maxlen8k-0501'
+  'openthoughts_100k_sft_qwen3_1.7b_lr1e7'
+  'openthoughts_100k_sft_qwen3_1.7b_lr5e7'
+  'openthoughts_100k_sft_qwen3_1.7b_lr1e6'
+  'openthoughts_100k_sft_qwen3_1.7b_lr5e6'
+  'openthoughts_100k_sft_qwen3_1.7b_lr1e5'
+  'openthoughts_100k_sft_qwen3_1.7b_lr5e5'
 )
 num_experiment_names=${#experiment_names[@]}
+
+max_lengths=(
+  8192
+  8192
+  8192
+  8192
+  8192
+  8192
+)
+num_max_lengths=${#max_lengths[@]}
+
+lrs=(
+  1e-7
+  5e-7
+  1e-6
+  5e-6
+  1e-5
+  5e-5
+)
+num_lrs=${#lrs[@]}
 
 if [ ${num_base_data_paths} -ne ${num_experiment_names} ]; then 
   echo "Number of base data paths and experiment names do not match"
@@ -63,6 +93,16 @@ fi
 
 if [ ${num_base_data_paths} -ne ${num_project_names} ]; then
   echo "Number of base data paths and project names do not match"
+  exit 1
+fi
+
+if [ ${num_base_data_paths} -ne ${num_max_lengths} ]; then
+  echo "Number of base data paths and max lengths do not match"
+  exit 1
+fi
+
+if [ ${num_base_data_paths} -ne ${num_lrs} ]; then
+  echo "Number of base data paths and lrs do not match"
   exit 1
 fi
 
@@ -83,6 +123,8 @@ for i in $(seq 0 $((num_base_data_paths - 1))); do
   experiment_name=${experiment_names[$i]}
   project_name=${project_names[$i]}
   model_name=${model_names[$i]}
+  max_length=${max_lengths[$i]}
+  lr=${lrs[$i]}
 
   default_hdfs_dir="/home/anikait.singh/rl_behaviors_verl_stable/sft_hdfs/${experiment_name}"
   default_local_dir="/home/anikait.singh/rl_behaviors_verl_stable/sft/${experiment_name}"
@@ -98,7 +140,11 @@ for i in $(seq 0 $((num_base_data_paths - 1))); do
   echo "Val file:   ${val_file}"
   echo "Experiment name: ${experiment_name}"
   echo "Model name: ${model_name}"
-  echo ""
+  echo "Max length: ${max_length}"
+  echo "Project name: ${project_name}"
+  echo "Default local dir: ${default_local_dir}"
+  echo "Default hdfs dir: ${default_hdfs_dir}"
+  echo "--------------------------------------------------"
 
   command="torchrun --nproc_per_node=8 -m verl.trainer.fsdp_sft_trainer \
     data.train_files=${train_file} \
@@ -118,6 +164,7 @@ for i in $(seq 0 $((num_base_data_paths - 1))); do
     trainer.experiment_name=${experiment_name} \
     trainer.total_epochs=${total_epochs} \
     trainer.logger=${logger} \
+    optim.lr=${lr} \
   "
 
   echo "--------------------------------------------------"

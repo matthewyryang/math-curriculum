@@ -295,9 +295,12 @@ def compute_contrastive_loss(
     paper1_scores, paper2_scores, joint_scores, no_context_scores = scores
     paper1_scores_avg, paper2_scores_avg, joint_scores_avg, no_context_scores_avg = scores_avg
     
+    max_score = torch.max(torch.max(paper1_scores, paper2_scores), no_context_scores)
+    max_score_avg = torch.max(torch.max(paper1_scores_avg, paper2_scores_avg), no_context_scores_avg)
+    
     # Calculate contrastive loss using vectorized operations
-    contrastive_loss = joint_scores - paper1_scores - paper2_scores - no_context_scores
-    contrastive_loss_avg = joint_scores_avg - paper1_scores_avg - paper2_scores_avg - no_context_scores_avg
+    contrastive_loss = joint_scores - max_score
+    contrastive_loss_avg = joint_scores_avg - max_score_avg
     
     return (
         paper1_scores, 

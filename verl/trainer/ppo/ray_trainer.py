@@ -698,10 +698,11 @@ class RayPPOTrainer(object):
             data_source_length[data_source].append(lengths[i])
             data_source_length_by_difficulty[data_source][difficulty].append(lengths[i])
 
-            if reward == 0:
+            reward_rounded = round(reward)
+            if reward_rounded == 0:
                 data_source_0_length[data_source].append(lengths[i])
                 data_source_0_length_by_difficulty[data_source][difficulty].append(lengths[i])
-            elif reward == 1:
+            elif reward_rounded == 1:
                 data_source_1_length[data_source].append(lengths[i])
                 data_source_1_length_by_difficulty[data_source][difficulty].append(lengths[i])
             else:
