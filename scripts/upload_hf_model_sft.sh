@@ -12,26 +12,27 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 all_local_dirs=(
-    '/home/anikait.singh/rl_behaviors_verl_stable/ppo/insight-grpo-sft1e5-bsz64-maxlen2k-2epoch/global_step_60/actor'
+    '/home/anikait.singh/rl_behaviors_verl_stable/sft/qwen3_4blrablation_filtered_0503_lr1e5/global_step_2796'
+    '/home/anikait.singh/rl_behaviors_verl_stable/sft/qwen3_4blrablation_filtered_0503_lr5e5/global_step_2796'
+    '/home/anikait.singh/rl_behaviors_verl_stable/sft/qwen3_4blrablation_filtered_0503_lr1e6/global_step_2796'
+    '/home/anikait.singh/rl_behaviors_verl_stable/sft/qwen3_4blrablation_filtered_0503_lr5e6/global_step_2796'
+    '/home/anikait.singh/rl_behaviors_verl_stable/sft/qwen3_4blrablation_filtered_0503_lr1e7/global_step_2796'
+    '/home/anikait.singh/rl_behaviors_verl_stable/sft/qwen3_4blrablation_filtered_0503_lr5e7/global_step_2796'
 )
 num_local_dirs=${#all_local_dirs[@]}
 
 all_target_dirs=(
-    'Asap7772/insight-grpo-step60'
+    'Asap7772/qwen3_4blrablation_filtered_0503_lr1e5'
+    'Asap7772/qwen3_4blrablation_filtered_0503_lr5e5'
+    'Asap7772/qwen3_4blrablation_filtered_0503_lr1e6'
+    'Asap7772/qwen3_4blrablation_filtered_0503_lr5e6'
+    'Asap7772/qwen3_4blrablation_filtered_0503_lr1e7'
+    'Asap7772/qwen3_4blrablation_filtered_0503_lr5e7'
 )
 num_target_dirs=${#all_target_dirs[@]}
-all_hf_model_paths=(
-    'Qwen/Qwen2.5-3B'
-)
-num_hf_model_paths=${#all_hf_model_paths[@]}
 
 if [ $num_local_dirs -ne $num_target_dirs ]; then
     echo "Number of local directories and target directories do not match"
-    exit 1
-fi
-
-if [ $num_local_dirs -ne $num_hf_model_paths ]; then
-    echo "Number of local directories and hf model paths do not match"
     exit 1
 fi
 
@@ -45,10 +46,8 @@ fi
 for i in $(seq 0 $((num_local_dirs - 1))); do
     LOCAL_DIR=${all_local_dirs[$i]}
     TARGET_DIR=${all_target_dirs[$i]}
-    hf_model_path=${all_hf_model_paths[$i]}
 
-    command="python /home/anikait.singh/verl-stable/scripts/model_merger.py --backend fsdp \
-        --hf_model_path $hf_model_path \
+    command="python /home/anikait.singh/verl-stable/scripts/upload_sft.py \
         --local_dir $LOCAL_DIR \
         --hf_upload_path $TARGET_DIR"
     echo $command

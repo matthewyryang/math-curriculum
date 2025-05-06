@@ -46,7 +46,7 @@ from verl.utils.dataset.rl_dataset import RLHFDataset, collate_fn
 from verl.utils.tracking import ValidationGenerationsLogger
 from torch.utils.data import RandomSampler, SequentialSampler
 from torchdata.stateful_dataloader import StatefulDataLoader
-
+import math
 WorkerType = Type[Worker]
 
 
@@ -697,8 +697,12 @@ class RayPPOTrainer(object):
             
             data_source_length[data_source].append(lengths[i])
             data_source_length_by_difficulty[data_source][difficulty].append(lengths[i])
-
-            reward_rounded = round(reward)
+            
+            if reward not in [0, 1]:
+                reward_rounded = round(1/(1+math.exp(-reward))) # sigmoid between 0 and 1
+            else:
+                reward_rounded = reward
+            
             if reward_rounded == 0:
                 data_source_0_length[data_source].append(lengths[i])
                 data_source_0_length_by_difficulty[data_source][difficulty].append(lengths[i])

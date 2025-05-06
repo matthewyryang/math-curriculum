@@ -31,7 +31,7 @@ eval_data_dirs=(
 num_eval_data_dirs=${#eval_data_dirs[@]}
 
 gpus=(
-    "0,1,2,3,4,5,6"
+    "0,1,2,3"
 )
 num_gpus=${#gpus[@]}
 
@@ -82,7 +82,7 @@ for i in $(seq 0 $((num_models-1))); do
         exit 1
     fi
 
-    export N_GPUS=7
+    export N_GPUS=4
     export BASE_MODEL=${models[$i]}
     export TRAIN_DATA_DIR=$curr_train_data_dir
     export EVAL_DATA_DIR=$curr_eval_data_dir
@@ -95,7 +95,7 @@ for i in $(seq 0 $((num_models-1))); do
     export MAX_PROMPT_LENGTH=1280
     export EPOCHS=2
 
-    command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_insight.sh"
+    command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_hint.sh"
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"
     echo $command
     if [ $dry_run = true ]; then
