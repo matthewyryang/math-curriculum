@@ -12,30 +12,45 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    /home/anikait.singh/rl_behaviors_verl_stable/sft/insight-warmstart-sft-qwen25-3b-3epoch-0501/global_step_30
+    '/home/anikait.singh/rl_behaviors_verl_stable/sft/qwen3_4blrablation_filtered_0503_lr1e6/global_step_2796'
+    '/home/anikait.singh/rl_behaviors_verl_stable/sft/qwen3_4blrablation_filtered_0503_lr1e6/global_step_2796'
+    '/home/anikait.singh/rl_behaviors_verl_stable/sft/qwen3_4blrablation_filtered_0503_lr1e6/global_step_2796'
+    '/home/anikait.singh/rl_behaviors_verl_stable/sft/qwen3_4blrablation_filtered_0503_lr1e6/global_step_2796'
 )
 num_models=${#models[@]}
 names=(
-    insight-grpo-sft1e5-bsz64-maxlen2k-2epoch
+    deepscaler-hintgen-grpo-sft1e6-n4
+    dapo-hintgen-grpo-sft1e6-n4
+    omnimath-hintgen-grpo-sft1e6-n4
+    aime-hintgen-grpo-sft1e6-n4
 )
 num_names=${#names[@]}
 
 train_data_dirs=(
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_insights_rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/data_deepscaler_rl_hintgen"
+    '/home/anikait.singh/rl_behaviors_verl_stable/data_dapo_rl_hintgen'
+    '/home/anikait.singh/rl_behaviors_verl_stable/data_omnimath_rl_hintgen'
+    '/home/anikait.singh/rl_behaviors_verl_stable/data_aime_rl_hintgen'
 )
 num_train_data_dirs=${#train_data_dirs[@]}
 
 eval_data_dirs=(
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_insights_rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/data_deepscaler_rl_hintgen"
+    '/home/anikait.singh/rl_behaviors_verl_stable/data_dapo_rl_hintgen'
+    '/home/anikait.singh/rl_behaviors_verl_stable/data_omnimath_rl_hintgen'
+    '/home/anikait.singh/rl_behaviors_verl_stable/data_aime_rl_hintgen'
 )
 num_eval_data_dirs=${#eval_data_dirs[@]}
 
 gpus=(
     "0,1,2,3"
+    "0,1,2,3"
+    "0,1,2,3"
+    "0,1,2,3"
 )
 num_gpus=${#gpus[@]}
 
-PROJECT_NAME='verl_stable_insight_grpo_0505'
+PROJECT_NAME='verl_stable_hintgen_grpo_0506'
 
 
 if [ $num_models -ne $num_names ]; then
@@ -92,7 +107,7 @@ for i in $(seq 0 $((num_models-1))); do
     export CUDA_VISIBLE_DEVICES=${gpus[$i]}
     export PROJECT_NAME=$PROJECT_NAME
     export MAX_MODEL_LEN=2048
-    export MAX_PROMPT_LENGTH=1280
+    export MAX_PROMPT_LENGTH=1024
     export EPOCHS=2
 
     command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_hint.sh"

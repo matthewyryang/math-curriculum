@@ -17,24 +17,31 @@ SAMPLES_PER_HINT = 8
 MAX_TOKENS = 8192
 TEMPERATURE = 0.6
 
-CLIENT = OpenAI(
-    base_url="http://localhost:8000/v1",
-    api_key="token-abc123",
-)
+def create_client():
+    return OpenAI(
+        base_url="http://localhost:8000/v1",
+        api_key="token-abc123",
+    )
 
 @tenacity.retry(stop=tenacity.stop_after_attempt(3), wait=tenacity.wait_exponential(multiplier=1, min=4, max=15))
-def get_completions(client, conv):
+def get_single_completion(conv):
+    client = create_client()
     completion = client.chat.completions.create(
         model=MODEL_NAME,
         messages=conv,
         max_tokens=MAX_TOKENS,
         temperature=TEMPERATURE,
-        n=SAMPLES_PER_HINT,
+        n=1,
     )
+    return completion.choices[0].message.content
+
+def get_completions(conv):
     if SAMPLES_PER_HINT == 1:
-        return completion.choices[0].message.content
-    else:
-        return [choice.message.content for choice in completion.choices]
+        return get_single_completion(conv)
+    
+    with ProcessPoolExecutor(max_workers=SAMPLES_PER_HINT) as executor:
+        futures = [executor.submit(get_single_completion, conv) for _ in range(SAMPLES_PER_HINT)]
+        return [future.result() for future in as_completed(futures)]
 
 def get_score(model_response, ground_truth):
     # # Extract solution.
@@ -81,7 +88,7 @@ def compute_score(data_source, solution_str, ground_truth, extra_info):
     hint = solution_str # hint from the hint generator
     problem = extra_info['problem']
     conv = build_conv('cheatsheet', problem, hint)
-    model_responses = get_completions(CLIENT, conv)
+    model_responses = get_completions(conv)
     scores = [get_score(model_response, ground_truth) for model_response in model_responses]
     avg_score = sum(scores) / (len(scores) or 1)
     return avg_score

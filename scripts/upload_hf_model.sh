@@ -52,11 +52,17 @@ for i in $(seq 0 $((num_local_dirs - 1))); do
         --local_dir $LOCAL_DIR \
         --hf_upload_path $TARGET_DIR"
     echo $command
+
+    command2="python /home/anikait.singh/verl-stable/scripts/save_tokenizer.py \
+        --hf_model_path $hf_model_path \
+        --hf_upload_path $TARGET_DIR"
+    echo $command2
     
     if [ $dry_run = true ]; then
         echo -e "Dry run. Skipping...\n\n"
     else
         eval ${command} &
+        eval ${command2} &
     fi
 
     exp_num=$((exp_num+1))
