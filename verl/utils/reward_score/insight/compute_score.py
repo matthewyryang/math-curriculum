@@ -12,10 +12,24 @@ import requests
 import json
 from tqdm import tqdm
 from collections import defaultdict
-from verl.utils.reward_score.curriculum_math.utils import extract_answer, grade_answer_sympy, grade_answer_mathd
+import re
 
+THOUGHT_DELIMITER_END = "</think>"
+
+def extract_insight(generated_text):
+    pattern = r"(<insight>.*?</insight>)"
+    insights_extracted = re.findall(pattern, generated_text, re.DOTALL)
+    if len(insights_extracted) > 0:
+        insight = insights_extracted[0]
+    else:
+        insight = ''
+    return insight
 
 def compute_score(data_source, solution_str, ground_truth, extra_info):
+    if THOUGHT_DELIMITER_END in solution_str:
+        solution_str = solution_str.split(THOUGHT_DELIMITER_END)[1]
+    solution_str = extract_insight(solution_str)
+    
     try:
         num_responses = 1
         insight_used = [str(solution_str)]
