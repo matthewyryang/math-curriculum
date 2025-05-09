@@ -5,6 +5,7 @@ import torch
 from typing import Union
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from eval_insights import compute_contrastive_loss
+import argparse
 
 app = FastAPI(title="Contrastive Loss API")
 
@@ -81,7 +82,10 @@ async def compute_contrastive_loss_endpoint(request: ContrastiveRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    # model_name_or_path = "Qwen/Qwen3-0.6B"
-    model_name_or_path = "Qwen/Qwen2.5-3B"
-    setup_model(model_name_or_path)
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", type=str, default="0.0.0.0")
+    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--model_name_or_path", type=str, default="Qwen/Qwen3-14B")
+    args = parser.parse_args()
+    setup_model(args.model_name_or_path)
+    uvicorn.run(app, host=args.host, port=args.port) 

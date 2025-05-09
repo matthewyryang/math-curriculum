@@ -259,7 +259,8 @@ def compute_contrastive_loss(
     insight_used, 
     model, 
     tokenizer,
-    batch_size: int = 32
+    batch_size: int = 32,
+    contrastive_loss_type: str = 'logsumexp'
 ):
     """
     Compute log probabilities and contrastive loss for insights under different contexts.
@@ -295,8 +296,17 @@ def compute_contrastive_loss(
     paper1_scores, paper2_scores, joint_scores, no_context_scores = scores
     paper1_scores_avg, paper2_scores_avg, joint_scores_avg, no_context_scores_avg = scores_avg
     
-    max_score = torch.max(torch.max(paper1_scores, paper2_scores), no_context_scores)
-    max_score_avg = torch.max(torch.max(paper1_scores_avg, paper2_scores_avg), no_context_scores_avg)
+    if contrastive_loss_type == 'max':
+        max_score = torch.max(torch.max(paper1_scores, paper2_scores), no_context_scores)
+        max_score_avg = torch.max(torch.max(paper1_scores_avg, paper2_scores_avg), no_context_scores_avg)
+    elif contrastive_loss_type == 'logsumexp':
+        max_score = torch.logsumexp(torch.stack([paper1_scores, paper2_scores, no_context_scores]), dim=0)
+        max_score_avg = torch.logsumexp(torch.stack([paper1_scores_avg, paper2_scores_avg, no_context_scores_avg]), dim=0)
+    elif contrastive_loss_type == 'sum':
+        max_score = paper1_scores + paper2_scores + no_context_scores
+        max_score_avg = paper1_scores_avg + paper2_scores_avg + no_context_scores_avg
+    else:
+        raise ValueError(f"Invalid contrastive loss type: {contrastive_loss_type}")
     
     # Calculate contrastive loss using vectorized operations
     contrastive_loss = joint_scores - max_score
