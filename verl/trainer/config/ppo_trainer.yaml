@@ -18,6 +18,34 @@ data:
   image_key: images
   prompt_template: null
 
+trainer:
+  balance_batch: True
+  total_epochs: 30
+  total_training_steps: null
+  project_name: verl_examples
+  experiment_name: gsm8k
+  logger: [ 'console', 'wandb' ]
+  log_val_generations: 3
+  nnodes: 1
+  n_gpus_per_node: 8
+  save_freq: -1
+  # auto: find the last ckpt to resume. If can't find, start from scratch
+  resume_mode: auto # or disable or resume_path if resume_from_path is set
+  resume_from_path: null
+  val_before_train: True
+  test_freq: -1
+  critic_warmup: 0
+  default_hdfs_dir: null
+  del_local_ckpt_after_load: False
+  default_local_dir: /project/flame/asetlur/checkpoints/math-curriculum/${trainer.project_name}/${trainer.experiment_name}
+  max_actor_ckpt_to_keep: null
+  max_critic_ckpt_to_keep: null
+  # The timeout for ray worker group to wait for the register center to be ready
+  ray_wait_register_center_timeout: 300
+  extrapolation_val: False
+  val_only: False
+
+
 actor_rollout_ref:
   hybrid_engine: True
   model:
@@ -87,6 +115,7 @@ actor_rollout_ref:
     prompt_length: ${data.max_prompt_length}  # not use for opensource
     response_length: ${data.max_response_length}
     extrapolation_length: ${data.max_extrapolation_length}
+    extrapolation_val: ${trainer.extrapolation_val}
     # for vllm rollout
     dtype: bfloat16 # should align with FSDP
     gpu_memory_utilization: 0.5
@@ -194,27 +223,4 @@ algorithm:
     horizon: 10000
     target_kl: 0.1
 
-trainer:
-  balance_batch: True
-  total_epochs: 30
-  total_training_steps: null
-  project_name: verl_examples
-  experiment_name: gsm8k
-  logger: [ 'console', 'wandb' ]
-  log_val_generations: 3
-  nnodes: 1
-  n_gpus_per_node: 8
-  save_freq: -1
-  # auto: find the last ckpt to resume. If can't find, start from scratch
-  resume_mode: auto # or disable or resume_path if resume_from_path is set
-  resume_from_path: null
-  val_before_train: True
-  test_freq: -1
-  critic_warmup: 0
-  default_hdfs_dir: null
-  del_local_ckpt_after_load: False
-  default_local_dir: /project/flame/asetlur/checkpoints/math-curriculum/${trainer.project_name}/${trainer.experiment_name}
-  max_actor_ckpt_to_keep: null
-  max_critic_ckpt_to_keep: null
-  # The timeout for ray worker group to wait for the register center to be ready
-  ray_wait_register_center_timeout: 300
+

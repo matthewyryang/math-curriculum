@@ -87,6 +87,7 @@ class FSDPSFTTrainer(object):
         local_model_path = copy_to_local(src=self.config.model.partial_pretrain, verbose=True)
         from verl.utils import hf_tokenizer
         self.tokenizer = hf_tokenizer(local_model_path, trust_remote_code=self.config.model.trust_remote_code)
+        self.tokenizer.model_max_length = 131072
         if self.config.data.chat_template is not None:
             raise ValueError('Apply Chat template from config is not supported yet.')
 
@@ -514,7 +515,7 @@ class FSDPSFTTrainer(object):
             torch.distributed.barrier()
 
             # save checkpoint
-            self.save_checkpoint(step=global_step)
+            # self.save_checkpoint(step=global_step)
 
 
 from verl.trainer.fsdp_sft_trainer import FSDPSFTTrainer

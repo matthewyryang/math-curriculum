@@ -202,7 +202,7 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
             incorrect_lengths_by_difficulty[difficulty].append(length.detach().item())
             incorrect_verifications_by_difficulty[difficulty].append(v_cnt)
     
-        zero_advantage_ratio_by_difficulty[difficulty].extend(list(adv.detach() * mask.detach().float() == 0))
+        zero_advantage_ratio_by_difficulty[difficulty].append(adv[0] == 0.)
 
     for difficulty in rewards_by_difficulty:
         mean_reward = np.mean(rewards_by_difficulty[difficulty])

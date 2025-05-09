@@ -94,11 +94,19 @@ class vLLMRollout(BaseRollout):
             vllm_ps.initialize_parallel_state(tensor_model_parallel_size=tensor_parallel_size,
                                               num_tp_per_train_tp=num_tp_per_train_tp)
 
-        assert model_hf_config.max_position_embeddings >= config.prompt_length + config.extrapolation_length, \
-            "model context length should be greater than total sequence length"
+        if config.extrapolation_val:
+            assert model_hf_config.max_position_embeddings >= config.prompt_length + config.extrapolation_length, \
+                "model context length should be greater than total extrapolaion sequence length"
+        else:
+            assert model_hf_config.max_position_embeddings >= config.prompt_length + config.response_length, \
+                "model context length should be greater than total sequence length"
 
-        max_model_len = self.config.max_model_len if self.config.max_model_len \
-                        else config.prompt_length + config.extrapolation_length
+        if config.max_model_len is not None:
+            max_model_len = config.max_model_len
+        elif config.extrapolation_val:
+            max_model_len = config.prompt_length + config.extrapolation_length
+        else:
+            max_model_len = config.prompt_length + config.response_length
         max_model_len = int(max_model_len)
 
         if max_num_batched_tokens < max_model_len and self.config.enable_chunked_prefill:
