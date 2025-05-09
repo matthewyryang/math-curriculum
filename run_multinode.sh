@@ -1,16 +1,16 @@
 #!/bin/bash
 #SBATCH --job-name=ray-multi
 #SBATCH --partition=flame # Or your desired partition
-#SBATCH --nodes=4           # Request exactly 2 nodes
+#SBATCH --nodes=2           # Request exactly 2 nodes
 #SBATCH --ntasks-per-node=1 # Run one main task per node (for ray start)
 #SBATCH --gres=gpu:8        # 8 GPUs per node
-#SBATCH --cpus-per-task=64  # 16 CPUs per node (ensure nodes have this many cores available)
+#SBATCH --cpus-per-task=96  # 16 CPUs per node (ensure nodes have this many cores available)
 #SBATCH --mem=1024G         # 1024G RAM per node (ensure nodes have this much memory)
 #SBATCH --time=47:59:00
 #SBATCH --output=slurm-ray-%j.out
 #SBATCH --error=slurm-ray-%j.err  # Good practice for separate error logs
 #SBATCH --qos=flame-t2_g1_qos
-#SBATCH --account=aviralku
+
 
 # --- Configuration ---
 RAY_PORT=6379            # Default Ray port 6379
@@ -18,7 +18,9 @@ RAY_DASHBOARD_PORT=8265 # Default Ray dashboard port 8265
 # Define the absolute path to the working directory for the job
 JOB_WORKING_DIR="/home/asetlur/math-curriculum"
 # Define the script to run *relative to the working directory*
-JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_16k.sh"
+# JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_16k.sh"
+JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_24k.sh"
+# JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_32k.sh"
 
 # --- Setup ---
 echo "Running on nodes: $SLURM_JOB_NODELIST"

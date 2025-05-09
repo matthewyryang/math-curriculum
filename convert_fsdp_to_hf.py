@@ -8,10 +8,9 @@ import os
 from collections import defaultdict
 
 
-def main(fsdp_checkpoint_path, huggingface_model_path, output_path):
+def main(fsdp_checkpoint_path, huggingface_model_path, output_path, world_size):
     state_dict = defaultdict(list)
 
-    world_size = 8
     for rank in range(world_size):
         filepath = f"{fsdp_checkpoint_path}/model_world_size_{world_size}_rank_{rank}.pt"
         print('loading', filepath)

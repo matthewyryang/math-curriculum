@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # export EXPERIMENT_NAME="8klen-sftqwen2.5-easymed-ent0.002-crh0.5l0.2"
-export EXPERIMENT_NAME="8klen-qwen3-easy-crh0.5l0.2-ent0.002"
+export EXPERIMENT_NAME="12klen-qwen3base-easymed-crh0.5l0.2-ent0.002"
 
 # export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-qwenformat-maxlen16k/global_step_2518"
 # export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-qwenformat-maxlen2k/global_step_630"
@@ -13,11 +13,11 @@ export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots
 source /home/asetlur/miniconda3/bin/activate verl 
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
-    data.train_files=/project/flame/asetlur/data/easy.parquet \
+    data.train_files=/project/flame/asetlur/data/easy_medium.parquet \
     data.val_files=/project/flame/asetlur/data/test.parquet \
     data.train_batch_size=128 \
     data.max_prompt_length=1024 \
-    data.max_response_length=8192 \
+    data.max_response_length=12288 \
     data.max_extrapolation_length=16384 \
     data.filter_overlong_prompts=True \
     actor_rollout_ref.model.path=$MODEL_PATH \

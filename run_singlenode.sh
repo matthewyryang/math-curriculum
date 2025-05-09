@@ -16,7 +16,11 @@
 # Define the absolute path to the working directory for the job
 JOB_WORKING_DIR="/home/asetlur/math-curriculum"
 # Define the script to run *relative to the working directory*
-JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_run.sh"
+# JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_run.sh"
+# JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_12k.sh"
+# JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/eval.sh"
+JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo_24k.sh"
+# JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/sft.sh"
 
 # --- Setup ---
 echo "Running on nodes: $SLURM_JOB_NODELIST"

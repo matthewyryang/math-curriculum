@@ -73,8 +73,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--num_samples", type=int, default=120000, help="No. of samples")
-    parser.add_argument("--max_length", type=int, default=3000, help="Max length of the prompt + completion")
-    parser.add_argument("--save_location", type=str, default="/project/flame/asetlur/OpenThoughts-114k-qwen-format-maxlen2k", help="Save location for the transformed dataset")
+    parser.add_argument("--max_length", type=int, default=26000, help="Max length of the prompt + completion")
+    parser.add_argument("--min_length", type=int, default=16384, help="Min length of the prompt + completion")
+    parser.add_argument("--save_location", type=str, default="/project/flame/asetlur/OpenThoughts-114k-qwen-format-minlen16k-maxlen24k", help="Save location for the transformed dataset")
     args = parser.parse_args()
 
     # Load the dataset
@@ -87,6 +88,7 @@ if __name__ == "__main__":
     random.shuffle(indices)
     top_indices = indices[:args.num_samples]
     tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B")
+    tokenizer.model_max_length = 32768
     
     # Transform the dataset
     transformed_ds = [
@@ -110,7 +112,7 @@ if __name__ == "__main__":
     encoded_prompt_lengths = np.array([lengths[0] for lengths in encoded_lengths])
     encoded_completion_lengths = np.array([lengths[1] for lengths in encoded_lengths])
 
-    selected_indices = np.where(encoded_prompt_lengths + encoded_completion_lengths < args.max_length)[0] 
+    selected_indices = np.where((encoded_prompt_lengths + encoded_completion_lengths < args.max_length) & (encoded_prompt_lengths + encoded_completion_lengths > args.min_length))[0] 
 
 
     selected_transformed_ds = [transformed_ds[i] for i in selected_indices]

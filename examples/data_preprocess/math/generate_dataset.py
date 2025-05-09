@@ -7,7 +7,7 @@ import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--local_dir', default='/home/cmu/math-curriculum/data')
+    parser.add_argument('--local_dir', default='/home/asetlur/math-curriculum/data')
     parser.add_argument('--remote_dir', default='d1shs0ap/math')
     parser.add_argument('--split', default=['train'], nargs='+')
     
@@ -60,4 +60,4 @@ if __name__ == '__main__':
     
     dataset = dataset.map(function=make_map_fn(args.split), with_indices=True)
 
-    dataset.to_parquet(os.path.join(args.local_dir, f'{"+".join(args.split)}.parquet'))
+    dataset.to_parquet(os.path.join(args.local_dir, f'{"_".join(args.split)}.parquet'))
