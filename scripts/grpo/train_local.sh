@@ -12,33 +12,41 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    Qwen/Qwen3-1.7B-Base
-    Qwen/Qwen3-1.7B-Base
-    Qwen/Qwen3-1.7B-Base
-    Qwen/Qwen3-1.7B-Base
+    /home/anikait.singh/rl_behaviors_verl_stable/sft/omnimath-hint-cond-sol-4b-sft/global_step_325
+    /home/anikait.singh/rl_behaviors_verl_stable/sft/deepscaler-hint-cond-sol-4b-sft/global_step_370
+    /home/anikait.singh/rl_behaviors_verl_stable/sft/dapo-hint-cond-sol-4b-sft/global_step_370
+    /home/anikait.singh/rl_behaviors_verl_stable/sft/omnimath-hint-cond-sol-mix-4b-sft/global_step_325
+    /home/anikait.singh/rl_behaviors_verl_stable/sft/deepscaler-hint-cond-sol-mix-4b-sft/global_step_370
+    /home/anikait.singh/rl_behaviors_verl_stable/sft/dapo-hint-cond-sol-mix-4b-sft/global_step_370
 )
 num_models=${#models[@]}
 names=(
-    aime-qwen3-17b-grpo-8k-aime-n16
-    aime-qwen3-17b-grpo-8k-omnimath-n16
-    aime-qwen3-17b-grpo-8k-dapo-n16
-    aime-qwen3-17b-grpo-8k-deepscaler-n16
+    omnimath-hint-cond-sol-4b-sft-init
+    deepscaler-hint-cond-sol-4b-sft-init
+    dapo-hint-cond-sol-4b-sft-init
+    omnimath-hint-cond-sol-mix-4b-sft-init
+    deepscaler-hint-cond-sol-mix-4b-sft-init
+    dapo-hint-cond-sol-mix-4b-sft-init
 )
 num_names=${#names[@]}
 
 train_data_dirs=(
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_aime_math"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_omnimath"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_dapo_math"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_deepscaler_amrith_math"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
 )
 num_train_data_dirs=${#train_data_dirs[@]}
 
 eval_data_dirs=(
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_aime2025_math"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_aime2025_math"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_aime2025_math"
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_aime2025_math"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
 )
 num_eval_data_dirs=${#eval_data_dirs[@]}
 
@@ -47,10 +55,20 @@ gpus=(
     "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"
+    "0,1,2,3,4,5,6,7"
+    "0,1,2,3,4,5,6,7"
 )
 num_gpus=${#gpus[@]}
 
-PROJECT_NAME='verl_stable_grpo_qwen3_17b_n16_0501'
+project_names=(
+    grpo_qwen3_4b_hintcondsolgen_mixfalse_n16_0508
+    grpo_qwen3_4b_hintcondsolgen_mixfalse_n16_0508
+    grpo_qwen3_4b_hintcondsolgen_mixfalse_n16_0508
+    grpo_qwen3_4b_hintcondsolgen_mixtrue_n16_0508
+    grpo_qwen3_4b_hintcondsolgen_mixtrue_n16_0508
+    grpo_qwen3_4b_hintcondsolgen_mixtrue_n16_0508
+)
+num_project_names=${#project_names[@]}
 
 
 if [ $num_models -ne $num_names ]; then
@@ -70,6 +88,11 @@ fi
 
 if [ $num_models -ne $num_eval_data_dirs ]; then
     echo "Number of models and eval data directories should be the same"
+    exit 1
+fi
+
+if [ $num_models -ne $num_project_names ]; then
+    echo "Number of models and project names should be the same"
     exit 1
 fi
 
@@ -109,6 +132,7 @@ for i in $(seq 0 $((num_models-1))); do
     export MAX_MODEL_LEN=8192
     export MAX_PROMPT_LENGTH=1024
     export EPOCHS=30
+    export PROJECT_NAME=${project_names[$i]}
 
     command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_dualclip.sh"
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"

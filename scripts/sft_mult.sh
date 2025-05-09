@@ -27,62 +27,44 @@ truncation="right"
 apply_chat_template=False
 
 model_names=(
-  'Qwen/Qwen3-1.7B-Base'
-  'Qwen/Qwen3-1.7B-Base'
-  'Qwen/Qwen3-1.7B-Base'
-  'Qwen/Qwen3-1.7B-Base'
-  'Qwen/Qwen3-1.7B-Base'
-  'Qwen/Qwen3-1.7B-Base'
+  'Qwen/Qwen3-4B-Base'
+  'Qwen/Qwen3-4B-Base'
+  'Qwen/Qwen3-4B-Base'
 )
 num_model_names=${#model_names[@]}
 
 project_names=(
-  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
-  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
-  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
-  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
-  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
-  'openthoughts_100k_sft_qwen3_1.7b_multiepochlr_filtered_0504'
+  'hint-cond-sol-gen-mix-5epoch-0508'
+  'hint-cond-sol-gen-mix-5epoch-0508'
+  'hint-cond-sol-gen-mix-5epoch-0508'
 )
 num_project_names=${#project_names[@]}
 
 base_data_paths=(
-  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
-  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
-  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
-  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
-  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
-  '/home/anikait.singh/rl_behaviors_verl_stable/data_openthoughts_100k_sft'
+  '/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mix-sft'
+  '/home/anikait.singh/rl_behaviors_verl_stable/deepscaler-hint-cond-sol-mix-sft'
+  '/home/anikait.singh/rl_behaviors_verl_stable/omnimath-hint-cond-sol-mix-sft'
 )
 num_base_data_paths=${#base_data_paths[@]}
 
 experiment_names=(
-  'openthoughts_100k_sft_qwen3_1.7b_lr1e7'
-  'openthoughts_100k_sft_qwen3_1.7b_lr5e7'
-  'openthoughts_100k_sft_qwen3_1.7b_lr1e6'
-  'openthoughts_100k_sft_qwen3_1.7b_lr5e6'
-  'openthoughts_100k_sft_qwen3_1.7b_lr1e5'
-  'openthoughts_100k_sft_qwen3_1.7b_lr5e5'
+  'dapo-hint-cond-sol-mix-4b-sft'
+  'deepscaler-hint-cond-sol-mix-4b-sft'
+  'omnimath-hint-cond-sol-mix-4b-sft'
 )
 num_experiment_names=${#experiment_names[@]}
 
 max_lengths=(
-  8192
-  8192
-  8192
-  8192
-  8192
-  8192
+  12288
+  12288
+  12288
 )
 num_max_lengths=${#max_lengths[@]}
 
 lrs=(
-  1e-7
-  5e-7
   1e-6
-  5e-6
-  1e-5
-  5e-5
+  1e-6
+  1e-6
 )
 num_lrs=${#lrs[@]}
 
@@ -165,6 +147,8 @@ for i in $(seq 0 $((num_base_data_paths - 1))); do
     trainer.total_epochs=${total_epochs} \
     trainer.logger=${logger} \
     optim.lr=${lr} \
+    model.enable_gradient_checkpointing=True \
+    model.use_liger=True \
   "
 
   echo "--------------------------------------------------"
