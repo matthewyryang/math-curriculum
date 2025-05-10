@@ -2,7 +2,7 @@ eval "$(conda shell.bash hook)"
 conda activate verl
 
 # Set environment variables
-hf_cache_dir="/home/anikait.singh/.cache"
+hf_cache_dir="/iris/u/asap7772/.cache"
 export WANDB_API_KEY=a393f29dee9351c0a8c4e410e626e20733564d26
 export WANDB_USERNAME=gurpreetkaur94539
 export WANDB_USER_EMAIL=gurpreetkaur94539gmail.com
@@ -16,17 +16,17 @@ models=(
 )
 num_models=${#models[@]}
 names=(
-    qwen3-1.7b-hint-cond-sol-mixfalse
+    qwen3-1.7b-hint-cond-sol-mixfalse-h100
 )
 num_names=${#names[@]}
 
 train_data_dirs=(
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
+    "/iris/u/asap7772/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
 )
 num_train_data_dirs=${#train_data_dirs[@]}
 
 eval_data_dirs=(
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
+    "/iris/u/asap7772/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
 )
 num_eval_data_dirs=${#eval_data_dirs[@]}
 
@@ -104,7 +104,7 @@ for i in $(seq 0 $((num_models-1))); do
     export EPOCHS=30
     export PROJECT_NAME=${project_names[$i]}
 
-    command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_dualclip.sh"
+    command="bash /iris/u/asap7772/verl-stable/scripts/grpo/grpo_run_dualclip.sh"
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"
     echo $command
     if [ $dry_run = true ]; then

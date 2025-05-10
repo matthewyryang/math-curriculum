@@ -33,13 +33,13 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.val_kwargs.temperature=0.6 \
     actor_rollout_ref.rollout.val_kwargs.do_sample=True \
     actor_rollout_ref.rollout.gpu_memory_utilization=0.8 \
-    actor_rollout_ref.rollout.n=8 \
-    actor_rollout_ref.rollout.val_kwargs.n=8 \
+    actor_rollout_ref.rollout.n=16 \
+    actor_rollout_ref.rollout.val_kwargs.n=16 \
     actor_rollout_ref.ref.fsdp_config.param_offload=True \
     actor_rollout_ref.rollout.enforce_eager=False \
     actor_rollout_ref.rollout.free_cache_engine=False \
     algorithm.use_kl_in_reward=False \
-    custom_reward_function.path=verl/utils/reward_score/curriculum_math/compute_score.py \
+    custom_reward_function.path=verl/utils/reward_score/insight/compute_score.py \
     trainer.critic_warmup=0 \
     trainer.logger=['console','wandb'] \
     trainer.project_name=$PROJECT_NAME \
@@ -48,8 +48,8 @@ python3 -m verl.trainer.main_ppo \
     trainer.default_hdfs_dir=null \
     trainer.n_gpus_per_node=$N_GPUS \
     trainer.nnodes=1 \
-    trainer.save_freq=100 \
-    trainer.test_freq=25 \
+    trainer.save_freq=2 \
+    trainer.test_freq=2 \
     trainer.total_training_steps=501 \
     trainer.default_local_dir=/iris/u/asap7772/rl_behaviors_verl_stable/ppo/$EXPERIMENT_NAME \
     trainer.total_epochs=$EPOCHS $@
