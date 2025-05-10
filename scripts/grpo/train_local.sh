@@ -12,61 +12,31 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    /home/anikait.singh/rl_behaviors_verl_stable/sft/omnimath-hint-cond-sol-4b-sft/global_step_325
-    /home/anikait.singh/rl_behaviors_verl_stable/sft/deepscaler-hint-cond-sol-4b-sft/global_step_370
-    /home/anikait.singh/rl_behaviors_verl_stable/sft/dapo-hint-cond-sol-4b-sft/global_step_370
-    /home/anikait.singh/rl_behaviors_verl_stable/sft/omnimath-hint-cond-sol-mix-4b-sft/global_step_325
-    /home/anikait.singh/rl_behaviors_verl_stable/sft/deepscaler-hint-cond-sol-mix-4b-sft/global_step_370
-    /home/anikait.singh/rl_behaviors_verl_stable/sft/dapo-hint-cond-sol-mix-4b-sft/global_step_370
+    Qwen/Qwen3-1.7B
 )
 num_models=${#models[@]}
 names=(
-    omnimath-hint-cond-sol-4b-sft-init
-    deepscaler-hint-cond-sol-4b-sft-init
-    dapo-hint-cond-sol-4b-sft-init
-    omnimath-hint-cond-sol-mix-4b-sft-init
-    deepscaler-hint-cond-sol-mix-4b-sft-init
-    dapo-hint-cond-sol-mix-4b-sft-init
+    qwen3-1.7b-hint-cond-sol-mixfalse
 )
 num_names=${#names[@]}
 
 train_data_dirs=(
     "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
 )
 num_train_data_dirs=${#train_data_dirs[@]}
 
 eval_data_dirs=(
     "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
-    "/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixTrue-rl"
 )
 num_eval_data_dirs=${#eval_data_dirs[@]}
 
 gpus=(
     "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
 )
 num_gpus=${#gpus[@]}
 
 project_names=(
-    grpo_qwen3_4b_hintcondsolgen_mixfalse_n16_0508
-    grpo_qwen3_4b_hintcondsolgen_mixfalse_n16_0508
-    grpo_qwen3_4b_hintcondsolgen_mixfalse_n16_0508
-    grpo_qwen3_4b_hintcondsolgen_mixtrue_n16_0508
-    grpo_qwen3_4b_hintcondsolgen_mixtrue_n16_0508
-    grpo_qwen3_4b_hintcondsolgen_mixtrue_n16_0508
+    grpo_qwen3_17b_hintcondsolgen_mixfalse_n16_repl_0510
 )
 num_project_names=${#project_names[@]}
 

@@ -27,42 +27,36 @@ truncation="right"
 apply_chat_template=False
 
 model_names=(
-  'Qwen/Qwen3-4B-Base'
-  'Qwen/Qwen3-4B-Base'
-  'Qwen/Qwen3-4B-Base'
+  'Qwen/Qwen3-1.7B-Base'
+  'Qwen/Qwen2.5-3B'
 )
 num_model_names=${#model_names[@]}
 
 project_names=(
-  'hint-cond-sol-gen-mix-5epoch-0508'
-  'hint-cond-sol-gen-mix-5epoch-0508'
-  'hint-cond-sol-gen-mix-5epoch-0508'
+  'insight-sft-0510'
+  'insight-sft-0510'
 )
 num_project_names=${#project_names[@]}
 
 base_data_paths=(
-  '/home/anikait.singh/rl_behaviors_verl_stable/dapo-hint-cond-sol-mix-sft'
-  '/home/anikait.singh/rl_behaviors_verl_stable/deepscaler-hint-cond-sol-mix-sft'
-  '/home/anikait.singh/rl_behaviors_verl_stable/omnimath-hint-cond-sol-mix-sft'
+  '/home/anikait.singh/rl_behaviors_verl_stable/insight-v2-sft'
+  '/home/anikait.singh/rl_behaviors_verl_stable/insight-v2-sft'
 )
 num_base_data_paths=${#base_data_paths[@]}
 
 experiment_names=(
-  'dapo-hint-cond-sol-mix-4b-sft'
-  'deepscaler-hint-cond-sol-mix-4b-sft'
-  'omnimath-hint-cond-sol-mix-4b-sft'
+  'insight-qwen3-1.7b-sft-0510'
+  'insight-qwen2.5-3b-sft-0510'
 )
 num_experiment_names=${#experiment_names[@]}
 
 max_lengths=(
   12288
   12288
-  12288
 )
 num_max_lengths=${#max_lengths[@]}
 
 lrs=(
-  1e-6
   1e-6
   1e-6
 )

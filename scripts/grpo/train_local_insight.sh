@@ -12,30 +12,35 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    /home/anikait.singh/rl_behaviors_verl_stable/sft/insight-warmstart-sft-qwen25-3b-3epoch-0501/global_step_30
+    /home/anikait.singh/rl_behaviors_verl_stable/sft/insight-qwen3-1.7b-sft-0510/global_step_370
+    /home/anikait.singh/rl_behaviors_verl_stable/sft/insight-qwen2.5-3b-sft-0510/global_step_370
 )
 num_models=${#models[@]}
 names=(
-    insight-grpo-sft1e5-bsz64-maxlen2k-2epoch
+    insight-qwen3-1.7b-grpo
+    insight-qwen2.5-3b-grpo
 )
 num_names=${#names[@]}
 
 train_data_dirs=(
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_insights_rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/data_insights_rl_v2"
+    "/home/anikait.singh/rl_behaviors_verl_stable/data_insights_rl_v2"
 )
 num_train_data_dirs=${#train_data_dirs[@]}
 
 eval_data_dirs=(
-    "/home/anikait.singh/rl_behaviors_verl_stable/data_insights_rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/data_insights_rl_v2"
+    "/home/anikait.singh/rl_behaviors_verl_stable/data_insights_rl_v2"
 )
 num_eval_data_dirs=${#eval_data_dirs[@]}
 
 gpus=(
     "0,1,2,3,4,5,6"
+    "0,1,2,3,4,5,6"
 )
 num_gpus=${#gpus[@]}
 
-PROJECT_NAME='verl_stable_insight_grpo_0505'
+PROJECT_NAME='verl_stable_insight_grpo_a100retry_0510'
 
 
 if [ $num_models -ne $num_names ]; then
