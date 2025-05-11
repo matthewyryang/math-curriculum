@@ -16,7 +16,7 @@ models=(
 )
 num_models=${#models[@]}
 names=(
-    qwen3-1.7b-hintsolgen-mixfalse-d1shs0ap-easy-chatfix
+    qwen3-1.7b-hintsolgen-mixfalse-d1shs0ap-easy-chatfix3k
 )
 num_names=${#names[@]}
 
@@ -36,7 +36,7 @@ gpus=(
 num_gpus=${#gpus[@]}
 
 project_names=(
-    grpo_qwen3_hintsolgen_d1shs0ap_easy_chatfix_0510
+    grpo_qwen3_hintsolgen_d1shs0ap_easy_chatfix3k_0510
 )
 num_project_names=${#project_names[@]}
 
@@ -100,7 +100,7 @@ for i in $(seq 0 $((num_models-1))); do
     export CUDA_VISIBLE_DEVICES=${gpus[$i]}
     export PROJECT_NAME=$PROJECT_NAME
     export MAX_MODEL_LEN=8192
-    export MAX_PROMPT_LENGTH=1024
+    export MAX_PROMPT_LENGTH=3072
     export EPOCHS=30
     export PROJECT_NAME=${project_names[$i]}
 
