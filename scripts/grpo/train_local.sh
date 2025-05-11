@@ -16,17 +16,17 @@ models=(
 )
 num_models=${#models[@]}
 names=(
-    qwen3-1.7b-hint-cond-sol-mixfalse-h100
+    qwen3-1.7b-hintsolgen-mixfalse-d1shs0ap-easy-chatfix
 )
 num_names=${#names[@]}
 
 train_data_dirs=(
-    "/iris/u/asap7772/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/data_d1shs0ap-easy-mixFalse-nochat"
 )
 num_train_data_dirs=${#train_data_dirs[@]}
 
 eval_data_dirs=(
-    "/iris/u/asap7772/rl_behaviors_verl_stable/dapo-hint-cond-sol-mixFalse-rl"
+    "/home/anikait.singh/rl_behaviors_verl_stable/data_d1shs0ap-easy-mixFalse-nochat"
 )
 num_eval_data_dirs=${#eval_data_dirs[@]}
 
@@ -36,7 +36,7 @@ gpus=(
 num_gpus=${#gpus[@]}
 
 project_names=(
-    grpo_qwen3_17b_hintcondsolgen_mixfalse_n16_repl_0510
+    grpo_qwen3_hintsolgen_d1shs0ap_easy_chatfix_0510
 )
 num_project_names=${#project_names[@]}
 
@@ -94,7 +94,7 @@ for i in $(seq 0 $((num_models-1))); do
     export BASE_MODEL=${models[$i]}
     export TRAIN_DATA_DIR=$curr_train_data_dir
     export EVAL_DATA_DIR=$curr_eval_data_dir
-    export ROLLOUT_TP_SIZE=2
+    export ROLLOUT_TP_SIZE=1
     export EXPERIMENT_NAME=${names[$i]}
     # export VLLM_ATTENTION_BACKEND=XFORMERS
     export CUDA_VISIBLE_DEVICES=${gpus[$i]}

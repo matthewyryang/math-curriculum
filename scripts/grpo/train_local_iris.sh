@@ -13,24 +13,24 @@ export HF_TOKEN='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'
 
 models=(
     Qwen/Qwen3-1.7B
-    Qwen/Qwen3-4B
+    Qwen/Qwen3-1.7B
 )
 num_models=${#models[@]}
 names=(
-    qwen3-1.7b-hint-cond-sol-mixtrue-d1shs0ap-easy
-    qwen3-4b-hint-cond-sol-mixfalse-d1shs0ap-easy
+    qwen3-1.7b-hintsolgen-mixtrue-d1shs0ap-easy-chatfix
+    qwen3-1.7b-hintsolgen-mixtrue-d1shs0ap-easy-chatfix-zerorew
 )
 num_names=${#names[@]}
 
 train_data_dirs=(
-    "/iris/u/asap7772/rl_behaviors_verl_stable/data_d1shs0ap-easy-mixTrue"
-    "/iris/u/asap7772/rl_behaviors_verl_stable/data_d1shs0ap-easy-mixTrue"
+    "/iris/u/asap7772/rl_behaviors_verl_stable/data_d1shs0ap-easy-mixTrue-nochat"
+    "/iris/u/asap7772/rl_behaviors_verl_stable/data_d1shs0ap-easy-mixTrue-nochat"
 )
 num_train_data_dirs=${#train_data_dirs[@]}
 
 eval_data_dirs=(
-    "/iris/u/asap7772/rl_behaviors_verl_stable/data_d1shs0ap-easy-mixTrue"
-    "/iris/u/asap7772/rl_behaviors_verl_stable/data_d1shs0ap-easy-mixTrue"
+    "/iris/u/asap7772/rl_behaviors_verl_stable/data_d1shs0ap-easy-mixTrue-nochat"
+    "/iris/u/asap7772/rl_behaviors_verl_stable/data_d1shs0ap-easy-mixTrue-nochat"
 )
 num_eval_data_dirs=${#eval_data_dirs[@]}
 
@@ -41,11 +41,15 @@ gpus=(
 num_gpus=${#gpus[@]}
 
 project_names=(
-    grpo_qwen3_hintcondsolgen_d1shs0ap_easy_0510
-    grpo_qwen3_hintcondsolgen_d1shs0ap_easy_0510
+    grpo_qwen3_hintsolgen_d1shs0ap_easy_chatfix_0510
+    grpo_qwen3_hintsolgen_d1shs0ap_easy_chatfix_0510
 )
 num_project_names=${#project_names[@]}
 
+commands=(
+    "bash /iris/u/asap7772/verl-stable/scripts/grpo/grpo_run_dualclip_iris.sh"
+    "bash /iris/u/asap7772/verl-stable/scripts/grpo/grpo_run_dualclip_iris_zerorew.sh"
+)
 
 if [ $num_models -ne $num_names ]; then
     echo "Number of models and names should be the same"
@@ -110,7 +114,7 @@ for i in $(seq 0 $((num_models-1))); do
     export EPOCHS=30
     export PROJECT_NAME=${project_names[$i]}
 
-    command="bash /iris/u/asap7772/verl-stable/scripts/grpo/grpo_run_dualclip_iris.sh"
+    command=${commands[$i]}
 
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"
     echo $command
