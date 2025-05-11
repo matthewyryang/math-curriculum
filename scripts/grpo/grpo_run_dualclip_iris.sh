@@ -51,5 +51,5 @@ python3 -m verl.trainer.main_ppo \
     trainer.save_freq=100 \
     trainer.test_freq=25 \
     trainer.total_training_steps=501 \
-    trainer.default_local_dir=/home/anikait.singh/rl_behaviors_verl_stable/ppo/$EXPERIMENT_NAME \
+    trainer.default_local_dir=/iris/u/asap7772/rl_behaviors_verl_stable/ppo/$EXPERIMENT_NAME \
     trainer.total_epochs=$EPOCHS $@
