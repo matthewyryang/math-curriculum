@@ -2,7 +2,7 @@ eval "$(conda shell.bash hook)"
 conda activate verl
 
 # Set environment variables
-hf_cache_dir="/iris/u/asap7772/.cache"
+hf_cache_dir="/home/anikait.singh/.cache"
 export WANDB_API_KEY=a393f29dee9351c0a8c4e410e626e20733564d26
 export WANDB_USERNAME=gurpreetkaur94539
 export WANDB_USER_EMAIL=gurpreetkaur94539gmail.com
@@ -104,7 +104,7 @@ for i in $(seq 0 $((num_models-1))); do
     export EPOCHS=30
     export PROJECT_NAME=${project_names[$i]}
 
-    command="bash /iris/u/asap7772/verl-stable/scripts/grpo/grpo_run_dualclip.sh"
+    command="bash /home/anikait.singh/verl-stable/scripts/grpo/grpo_run_dualclip.sh"
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"
     echo $command
     if [ $dry_run = true ]; then
