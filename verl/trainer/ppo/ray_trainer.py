@@ -46,7 +46,7 @@ from verl.utils.dataset.rl_dataset import RLHFDataset, collate_fn
 from verl.utils.tracking import ValidationGenerationsLogger
 from torch.utils.data import RandomSampler, SequentialSampler
 from torchdata.stateful_dataloader import StatefulDataLoader
-
+import math
 WorkerType = Type[Worker]
 
 
@@ -631,17 +631,20 @@ class RayPPOTrainer(object):
             if 'level' in test_batch.non_tensor_batch:
                 difficulties.extend(list(test_batch.non_tensor_batch['level']))
             else:
-                ref_rewards = list(test_batch.non_tensor_batch['reward'])
-                def return_difficulty(ref_model_reward):
-                    difficulty = 'unknown'
-                    if ref_model_reward > 10 / 16:
-                        difficulty = 'easy'
-                    elif ref_model_reward == 0:
-                        difficulty = 'hard'
-                    else:
-                        difficulty = 'medium'
-                    return difficulty
-                difficulties.extend([return_difficulty(ref_reward) for ref_reward in ref_rewards])
+                try:
+                    ref_rewards = list(test_batch.non_tensor_batch['reward'])
+                    def return_difficulty(ref_model_reward):
+                        difficulty = 'unknown'
+                        if ref_model_reward > 10 / 16:
+                            difficulty = 'easy'
+                        elif ref_model_reward == 0:
+                            difficulty = 'hard'
+                        else:
+                            difficulty = 'medium'
+                        return difficulty
+                    difficulties.extend([return_difficulty(ref_reward) for ref_reward in ref_rewards])
+                except:
+                    difficulties.extend(['unknown'] * len(sample_inputs))
             lengths.extend(map(lambda text: len(self.tokenizer.encode(text)), output_texts))
 
         self._maybe_log_val_generations(inputs=sample_inputs, outputs=sample_outputs, scores=sample_scores)
@@ -695,11 +698,16 @@ class RayPPOTrainer(object):
             
             data_source_length[data_source].append(lengths[i])
             data_source_length_by_difficulty[data_source][difficulty].append(lengths[i])
-
-            if reward == 0:
+            
+            if reward not in [0, 1]:
+                reward_rounded = round(1/(1+math.exp(-reward))) # sigmoid between 0 and 1
+            else:
+                reward_rounded = reward
+            
+            if reward_rounded == 0:
                 data_source_0_length[data_source].append(lengths[i])
                 data_source_0_length_by_difficulty[data_source][difficulty].append(lengths[i])
-            elif reward == 1:
+            elif reward_rounded == 1:
                 data_source_1_length[data_source].append(lengths[i])
                 data_source_1_length_by_difficulty[data_source][difficulty].append(lengths[i])
             else:
