@@ -118,7 +118,8 @@ class RLHFDataset(Dataset):
         self.truncation = truncation
         self.filter_overlong_prompts = filter_overlong_prompts
         if num_workers is None:
-            self.num_workers = max(1, os.cpu_count() // 4)
+            # self.num_workers = max(1, os.cpu_count() // 4)
+            self.num_workers = os.cpu_count()
         else:
             self.num_workers = min(num_workers, os.cpu_count())
 

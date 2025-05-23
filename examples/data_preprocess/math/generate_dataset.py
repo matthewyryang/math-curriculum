@@ -9,7 +9,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--local_dir', default='/project/flame/asetlur/data')
     parser.add_argument('--remote_dir', default='d1shs0ap/math')
-    parser.add_argument('--split', default=['train'], nargs='+')
+    parser.add_argument('--split', default=['test'], nargs='+')
     
 
     args = parser.parse_args()

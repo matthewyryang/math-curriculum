@@ -175,9 +175,10 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
     zero_advantage_ratio_by_difficulty = defaultdict(list)
 
     if 'level' not in batch.non_tensor_batch:
-        diffulties = []
-        for ref_model_reward, reward, length, v_cnt in zip(batch.non_tensor_batch['reward'], sequence_reward, response_length, verification_cnts):
-            binary_reward = 1 if reward > 0.9 else 0
+        try:
+            diffulties = []
+            for ref_model_reward, reward, length, v_cnt in zip(batch.non_tensor_batch['reward'], sequence_reward, response_length, verification_cnts):
+                binary_reward = 1 if reward > 0.9 else 0
             
             difficulty = 'unknown'
             if ref_model_reward > 10 / 16:
@@ -187,7 +188,9 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = True, experiment_n
             else:
                 difficulty = 'medium'
 
-            diffulties.append(difficulty)
+                diffulties.append(difficulty)
+        except:
+            diffulties = ['unknown'] * len(response_length)
     else:
         diffulties = batch.non_tensor_batch['level']
 
