@@ -9,7 +9,7 @@ split = dataset[split_name]
 
 # Add the new column
 def add_extra_info(example, idx):
-    return {"extra_info": {"index": example['id'], "split": 'test'}}
+    return {"extra_info": {"index": idx+50, "split": 'hmmt'}}
 
 def add_ability(example, idx):
     return {"ability": 'math'}

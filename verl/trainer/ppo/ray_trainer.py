@@ -708,28 +708,28 @@ class RayPPOTrainer(object):
 
         metric_dict = {}
         for data_source, rewards in data_source_reward.items():
-            metric_dict[f"{'extrapolation_' if extrapolate else ''}val/reward/mean"] = np.mean(rewards)
-            metric_dict[f"{'extrapolation_' if extrapolate else ''}val/test_score/"] = np.mean(rewards)
-            metric_dict[f"{'extrapolation_' if extrapolate else ''}val/length/mean"] = np.mean(data_source_length[data_source])
-            metric_dict[f"{'extrapolation_' if extrapolate else ''}val/0_length/mean"] = np.mean(data_source_0_length[data_source]) if len(data_source_0_length[data_source]) > 0 else -1
-            metric_dict[f"{'extrapolation_' if extrapolate else ''}val/1_length/mean"] = np.mean(data_source_1_length[data_source]) if len(data_source_1_length[data_source]) > 0 else -1            
+            metric_dict[f"{'extrapolation_' if extrapolate else ''}val/{data_source}/reward/mean"] = np.mean(rewards)
+            metric_dict[f"{'extrapolation_' if extrapolate else ''}val/{data_source}/test_score/"] = np.mean(rewards)
+            metric_dict[f"{'extrapolation_' if extrapolate else ''}val/{data_source}/length/mean"] = np.mean(data_source_length[data_source])
+            metric_dict[f"{'extrapolation_' if extrapolate else ''}val/{data_source}/0_length/mean"] = np.mean(data_source_0_length[data_source]) if len(data_source_0_length[data_source]) > 0 else -1
+            metric_dict[f"{'extrapolation_' if extrapolate else ''}val/{data_source}/1_length/mean"] = np.mean(data_source_1_length[data_source]) if len(data_source_1_length[data_source]) > 0 else -1            
             
             for difficulty, per_difficulty_rewards in data_source_reward_by_difficulty[data_source].items():
-                metric_dict[f"{'extrapolation_' if extrapolate else ''}val/reward/{difficulty}"] = np.mean(per_difficulty_rewards)
-                metric_dict[f"{'extrapolation_' if extrapolate else ''}val/test_score/{difficulty}"] = np.mean(per_difficulty_rewards)
+                metric_dict[f"{'extrapolation_' if extrapolate else ''}val/{data_source}/reward/{difficulty}"] = np.mean(per_difficulty_rewards)
+                metric_dict[f"{'extrapolation_' if extrapolate else ''}val/{data_source}/test_score/{difficulty}"] = np.mean(per_difficulty_rewards)
             
             for difficulty, per_difficulty_lengths in data_source_length_by_difficulty[data_source].items():
-                metric_dict[f"{'extrapolation_' if extrapolate else ''}val/length/{difficulty}"] = np.mean(per_difficulty_lengths)
+                metric_dict[f"{'extrapolation_' if extrapolate else ''}val/{data_source}/length/{difficulty}"] = np.mean(per_difficulty_lengths)
             
             for difficulty in data_source_length_by_difficulty[data_source].keys():
                 per_difficulty_lengths = data_source_0_length_by_difficulty[data_source][difficulty]
                 mean_incorrect_length = np.mean(per_difficulty_lengths) if len(per_difficulty_lengths) > 0 else -1
-                metric_dict[f"{'extrapolation_' if extrapolate else ''}val/0_length/{difficulty}"] = mean_incorrect_length
+                metric_dict[f"{'extrapolation_' if extrapolate else ''}val/{data_source}/0_length/{difficulty}"] = mean_incorrect_length
             
             for difficulty in data_source_length_by_difficulty[data_source].keys():
                 per_difficulty_lengths = data_source_1_length_by_difficulty[data_source][difficulty]
                 mean_correct_length = np.mean(per_difficulty_lengths) if len(per_difficulty_lengths) > 0 else -1
-                metric_dict[f"{'extrapolation_' if extrapolate else ''}val/1_length/{difficulty}"] = mean_correct_length
+                metric_dict[f"{'extrapolation_' if extrapolate else ''}val/{data_source}/1_length/{difficulty}"] = mean_correct_length
         
 
 
@@ -988,9 +988,16 @@ class RayPPOTrainer(object):
             for batch_dict in self.train_dataloader:
                 metrics = {}
                 timing_raw = {}
-
-                batch: DataProto = DataProto.from_single_dict(batch_dict)
-
+                from copy import deepcopy
+                if (self.global_steps - 1) % 1 ==0: 
+                    print(f"global_steps: {self.global_steps}, fetching batch_dict")
+                    batch: DataProto = DataProto.from_single_dict(batch_dict)
+                    batch.non_tensor_batch['uid'] = np.array([str(uuid.uuid4()) for _ in range(len(batch.batch))],
+                                                             dtype=object)
+                    previous_batch = deepcopy(batch)
+                else: 
+                    print(f"global_steps: {self.global_steps}, using previous batch")
+                    batch = deepcopy(previous_batch)
                 # pop those keys for generation
                 if 'multi_modal_inputs' in batch.non_tensor_batch.keys():
                     gen_batch = batch.pop(
@@ -1026,8 +1033,8 @@ class RayPPOTrainer(object):
 
                             del gen_baseline_batch, gen_baseline_output
 
-                    batch.non_tensor_batch['uid'] = np.array([str(uuid.uuid4()) for _ in range(len(batch.batch))],
-                                                             dtype=object)
+                    print(f"global step: {self.global_steps}", "uids:", batch.non_tensor_batch['uid'])
+
                     # repeat to align with repeated responses in rollout
                     batch = batch.repeat(repeat_times=self.config.actor_rollout_ref.rollout.n, interleave=True)
                     batch = batch.union(gen_batch_output)

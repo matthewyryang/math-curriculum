@@ -1,8 +1,8 @@
-LOCAL_DIR=/home/cmu/math-curriculum/checkpoints/Math/easy-4096/global_step_200/actor
-TARGET_DIR=d1shs0ap/medium-8192-from-easy-4096
+# LOCAL_DIR=/project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-qwen3-easy-crh0.5l0.2-ent0.002/global_step_100/actor/hf-format
+LOCAL_DIR=/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8k-medium2500-medium2500set2/global_step_25/actor
+TARGET_DIR=d1shs0ap/easy-8k-med16k
 
 python scripts/model_merger.py --backend fsdp \
-    --hf_model_path deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B \
+    --hf_model_path Qwen/Qwen3-1.7B \
     --local_dir $LOCAL_DIR \
     --hf_upload_path $TARGET_DIR
-

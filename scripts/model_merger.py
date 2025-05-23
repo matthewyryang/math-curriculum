@@ -29,7 +29,7 @@ except ImportError:
     from torch.distributed._tensor import DTensor
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--backend', type=str, required=True, help="The backend of the model", choices=["fsdp", "megatron"])
+parser.add_argument('--backend', type=str, required=True, help="The backend of the model", choices=["fsdp", "megatron", "upload_only"])
 parser.add_argument('--tie-word-embedding', action='store_true', help="Whether to tie word embedding weights")
 parser.add_argument('--is-value-model', action='store_true', help="Whether the model loaded as value model")
 parser.add_argument('--hf_model_path', type=str, required=True, help="The path for the huggingface model")
@@ -437,5 +437,7 @@ if __name__ == '__main__':
         convert_fsdp_checkpoints_to_hfmodels()
     elif args.backend == "megatron":
         convert_megatron_checkpoints_to_hfmodels()
+    elif args.backend == "upload_only":
+        upload_model_to_huggingface(args.local_dir)
     else:
         raise NotImplementedError(f"{args.backend} not supported")

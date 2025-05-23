@@ -20,8 +20,9 @@ if __name__ == "__main__":
     # Load the JSON file as a pandas DataFrame
     df = pd.read_json(args.filename)
 
-    tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B")
-    tokenizer.model_max_length = 32768
+    # tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B")
+    # tokenizer.model_max_length = 32768
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-1.7B")
 
     print(f"Dataset size: {len(df)}")
     print("Applying tokenization...")
