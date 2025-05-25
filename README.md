@@ -1,4 +1,4 @@
-# Setup
+## Environment setup
 ```bash
 # Create the conda environment
 conda create -n verl python==3.10
@@ -23,15 +23,18 @@ uv pip install tensordict==0.6.2
 uv pip install liger-kernel
 ```
 
-# dataset setup
+## Dataset setup
 
 ```
 mkdir -p data
 python examples/data_preprocess/math/generate_dataset.py --local_dir "./data" --split train
 python examples/data_preprocess/math/generate_dataset.py --local_dir "./data" --split test
+python examples/data_preprocess/math/generate_dataset.py --local_dir "./data" --split easy
+python examples/data_preprocess/math/generate_dataset.py --local_dir "./data" --split medium
+python examples/data_preprocess/math/generate_dataset.py --local_dir "./data" --split hard
 ```
 
-# e3 uses a coupled curriculum
+## e3 recipe uses a coupled curriculum
 - First train on easy problems in the training mixture, with a max sequence length of 8192  
 ```
 bash scripts/grpo/grpo_8k.sh
