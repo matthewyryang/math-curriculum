@@ -15,7 +15,7 @@
 # --- Configuration ---
 # Define the absolute path to the working directory for the job
 JOB_WORKING_DIR="/home/asetlur/math-curriculum"
-JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_8k.sh"
+JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/eval.sh"
 
 # --- Setup ---
 echo "Running on nodes: $SLURM_JOB_NODELIST"

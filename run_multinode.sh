@@ -19,8 +19,6 @@ RAY_DASHBOARD_PORT=8265 # Default Ray dashboard port 8265
 JOB_WORKING_DIR="/home/asetlur/math-curriculum"
 # Define the script to run *relative to the working directory*
 JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_16k.sh"
-# JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_24k.sh"
-# JOB_SCRIPT_NAME="$JOB_WORKING_DIR/scripts/grpo/grpo_32k.sh"
 
 # --- Setup ---
 echo "Running on nodes: $SLURM_JOB_NODELIST"
@@ -89,16 +87,6 @@ sleep 5
 
 # --- Submit Ray Job ---
 echo "Submitting Ray job: $JOB_SCRIPT_NAME from $JOB_WORKING_DIR"
-# *** REMOVED srun wrapper ***
-# Execute ray job submit directly from the main script context
-# Ensure the JOB_SCRIPT_NAME is executable and exists within JOB_WORKING_DIR
-
-# srun --export=ALL --nodes=1 --ntasks=1 -w "$head_node" \
-#     cd $JOB_WORKING_DIR & bash $JOB_SCRIPT_NAME \
-#     --block &
-
-# job_submit_status=$(srun --export=ALL --nodes=1 --ntasks=1 -w "$head_node" \
-#     /project/flame/asetlur/miniconda3/envs/verl/bin/ray job submit --address="http://127.0.0.1:8265"  --no-wait --runtime-env $JOB_WORKING_DIR/runtime_env.yaml sh -c "cd $JOB_WORKING_DIR && exec bash $JOB_SCRIPT_NAME")
 
 /project/flame/asetlur/miniconda3/envs/verl/bin/ray job submit --address="http://$head_node_ip:$RAY_DASHBOARD_PORT" \
   --no-wait \
