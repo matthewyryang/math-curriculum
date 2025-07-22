@@ -435,7 +435,10 @@ def compute_policy_loss(old_log_prob,
                                            1 + cliprange_high)  # - clip(ratio, 1-cliprange, 1+cliprange) * A
     clip_pg_losses1 = torch.maximum(pg_losses1,
                                     pg_losses2)  # max(-ratio * A, -clip(ratio, 1-cliprange, 1+cliprange) * A)
-    pg_clipfrac = verl_F.masked_mean(torch.gt(pg_losses2, pg_losses1).float(), response_mask)
+    
+    did_ppo_clip = torch.gt(pg_losses2, pg_losses1).float()
+    pg_clipfrac = verl_F.masked_mean(did_ppo_clip, response_mask)
+    
 
     pg_losses3 = -advantages * clip_ratio_c
     clip_pg_losses2 = torch.min(pg_losses3, clip_pg_losses1)
@@ -448,7 +451,7 @@ def compute_policy_loss(old_log_prob,
 
     pg_loss = agg_loss(loss_mat=pg_losses, loss_mask=response_mask, loss_agg_mode=loss_agg_mode)
 
-    return pg_loss, pg_clipfrac, ppo_kl, pg_clipfrac_lower
+    return pg_loss, pg_clipfrac, ppo_kl, pg_clipfrac_lower, ratio, did_ppo_clip
 
 
 def compute_entropy_loss(logits, response_mask):

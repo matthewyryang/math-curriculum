@@ -138,6 +138,7 @@ actor_rollout_ref:
     do_sample: True
     # number of responses (i.e. num sample times)
     n: 1 # > 1 for grpo
+    rollout_micro_batch_size: 64 # the micro batch size for rollout, which is used to generate sequences
     val_kwargs:
       # sampling parameters for validation
       top_k: -1 # 0 for hf rollout, -1 for vllm rollout
@@ -222,5 +223,9 @@ algorithm:
     kl_coef: 0.001
     horizon: 10000
     target_kl: 0.1
+  # filter_groups:
+  #   enable: False # We try to avoid forgetting to set enable
+  #   metric: null # acc / score / seq_reward / seq_final_reward / ...
+  #   max_num_gen_batches: 0 # Non-positive values mean no upper limit
 
 

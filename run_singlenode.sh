@@ -9,9 +9,10 @@
 #SBATCH --time=47:59:00
 #SBATCH --output=slurm-ray-%j.out
 #SBATCH --error=slurm-ray-%j.err  # Good practice for separate error logs
-#SBATCH --qos=flame-t2_g1_qos
+#SBATCH --qos=flame-t1b_g1_qos
 #SBATCH --account=aviralku
 
+# t2_g1_qos, t1b_g1_qos,flame-t2_g1_qos
 # --- Configuration ---
 # Define the absolute path to the working directory for the job
 JOB_WORKING_DIR="/home/asetlur/math-curriculum"

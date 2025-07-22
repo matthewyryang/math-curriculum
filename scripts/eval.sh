@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export EXPERIMENT_NAME="eval32k-16klen-qwen3easy8k-medium2500-b64mb32n32-crh0.35l0.2-ckpt60-hmmtaime25"
+export EXPERIMENT_NAME="eval32k-16klen-qwen3easy8koldckpt-medium2500-b320mb160n16genmb64-crh0.35l0.2-ckpt80-hmmtaime25"
 
 # export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8k-medium-b128mb64n16/global_step_60/actor/hf-format"
 # export MODEL_PATH="/project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots/d3e258980a49b060055ea9038dad99d75923f7c4"
@@ -15,8 +15,14 @@ export EXPERIMENT_NAME="eval32k-16klen-qwen3easy8k-medium2500-b64mb32n32-crh0.35
 # export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-medium5000-b64mb32n32-crh0.5l0.2/global_step_90/actor/hf-format"
 # export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8knewckpt-medium2500-b64mb32n32-crh0.35l0.2/global_step_60/actor/hf-format"
 # export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-medium5000-b64mb32n32-crh0.5l0.2/global_step_60/actor/hf-format"
+# export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8k-medium2500-b64mb32n32-crh0.35l0.2/global_step_60/actor/hf-format"
+# export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-medium5000-b64mb32n32-crh0.35l0.2/global_step_120/actor/hf-format"
+# export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-hard2500-b64mb32n32-crh0.35l0.2/global_step_90/actor/hf-format"
+# export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-hard2500-b64mb32n32-crh0.35l0.2/global_step_90/actor/hf-format"
+# export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-hard64-b64mb32n16-crh0.35l0.2_redlog/global_step_90/actor/hf-format"
+# export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-hard2500-b320mb160n16genmb64-lr2e-6-crh0.35l0.2/global_step_16/actor/hf-format"
 
-export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8k-medium2500-b64mb32n32-crh0.35l0.2/global_step_60/actor/hf-format"
+export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-medium2500-b320mb160n16genmb64-crh0.35l0.2/global_step_80/actor/hf-format"
 
 source /home/asetlur/miniconda3/bin/activate verl 
 python3 -m verl.trainer.main_ppo \
@@ -69,7 +75,7 @@ python3 -m verl.trainer.main_ppo \
     trainer.experiment_name=$EXPERIMENT_NAME \
     trainer.val_before_train=True \
     trainer.n_gpus_per_node=8 \
-    trainer.nnodes=4 \
+    trainer.nnodes=1 \
     trainer.save_freq=100 \
     trainer.test_freq=25 \
     trainer.total_training_steps=501 \

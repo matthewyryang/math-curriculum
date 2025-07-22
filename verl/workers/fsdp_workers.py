@@ -39,6 +39,7 @@ from verl.utils.model import compute_position_id_with_mask
 from verl.utils.flops_counter import FlopsCounter
 from verl.utils.checkpoint.fsdp_checkpoint_manager import FSDPCheckpointManager
 from verl.workers.sharding_manager.fsdp_ulysses import FSDPUlyssesShardingManager
+from collections import defaultdict
 
 from codetiming import Timer
 
@@ -460,7 +461,7 @@ class ActorRolloutRefWorker(Worker):
             data = self.ulysses_sharding_manager.preprocess_data(data=data)
             # perform training
             with Timer(name='update_policy', logger=None) as timer:
-                metrics = self.actor.update_policy(data=data)
+                metrics, trace_level_data = self.actor.update_policy(data=data)
             delta_time = timer.last
             global_num_tokens = data.meta_info['global_token_num']
             estimated_flops, promised_flops = self.flops_counter.estimate_flops(global_num_tokens, delta_time)
@@ -477,9 +478,21 @@ class ActorRolloutRefWorker(Worker):
             log_gpu_memory_usage('After update policy', logger=logger)
 
             # TODO: here, we should return all metrics
-            output = DataProto(meta_info={'metrics': metrics})
+            if torch.distributed.is_initialized() and torch.distributed.get_world_size() > 1:
+                gathered = [None for _ in range(torch.distributed.get_world_size())]
+                torch.distributed.all_gather_object(gathered, trace_level_data)  # Each is a dict of lists
 
+                # Merge dicts of lists
+                merged_trace_level_data = defaultdict(list)
+                for rank_data in gathered:
+                    for k, v in rank_data.items():
+                        merged_trace_level_data[k].extend(v)
+
+                trace_level_data = dict(merged_trace_level_data)
+
+            output = DataProto(meta_info={'metrics': metrics, 'trace_level_data': trace_level_data})
             output = self.ulysses_sharding_manager.postprocess_data(data=output)
+
             output = output.to('cpu')
 
         if self._is_offload_param:

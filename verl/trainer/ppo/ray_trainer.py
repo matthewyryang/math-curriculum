@@ -666,7 +666,7 @@ class RayPPOTrainer(object):
         if self.config.trainer.default_local_dir is not None:
             hdfs_io.makedirs(self.config.trainer.default_local_dir, exist_ok=True)
         rollouts_json = json.dumps(rollouts)
-        rollouts_save_location = f"{self.config.trainer.default_local_dir}/{self.global_steps}_{'extrapolation_' if extrapolate else ''}rollouts.json"
+        rollouts_save_location = f"{self.config.trainer.default_local_dir}/eval_{'extrapolation_' if extrapolate else ''}rollouts.json"
         with open(rollouts_save_location, 'w') as f:
             f.write(rollouts_json)
         
@@ -988,6 +988,8 @@ class RayPPOTrainer(object):
             for batch_dict in self.train_dataloader:
                 metrics = {}
                 timing_raw = {}
+
+
                 from copy import deepcopy
                 if (self.global_steps - 1) % 1 ==0: 
                     print(f"global_steps: {self.global_steps}, fetching batch_dict")
@@ -1015,7 +1017,13 @@ class RayPPOTrainer(object):
                 with _timer('step', timing_raw):
                     # generate a batch
                     with _timer('gen', timing_raw):
-                        gen_batch_output = self.actor_rollout_wg.generate_sequences(gen_batch)
+                        gen_micro_batches = gen_batch.chunk(
+                            len(gen_batch) // self.config.actor_rollout_ref.rollout.rollout_micro_batch_size)
+                        gen_batch_outputs = []
+                        for i, gen_micro_batch in enumerate(gen_micro_batches):
+                            gen_batch_outputs.append(self.actor_rollout_wg.generate_sequences(gen_micro_batch))
+                            print(f"Finished generating micro batch {i + 1}/{len(gen_micro_batches)}")
+                        gen_batch_output = DataProto.concat(gen_batch_outputs)
 
                     if self.config.algorithm.adv_estimator == AdvantageEstimator.REMAX:
                         with _timer('gen_max', timing_raw):
@@ -1048,6 +1056,15 @@ class RayPPOTrainer(object):
 
                     # compute global_valid tokens
                     batch.meta_info['global_token_num'] = torch.sum(batch.batch['attention_mask'], dim=-1).tolist()
+
+                    # update batch 
+                    extra_info = batch.non_tensor_batch.get('extra_info')
+                    indices = [x['index'] for x in extra_info]
+                    batch.non_tensor_batch['indices'] = np.array(indices)
+                    input_ids = batch.batch['input_ids']
+                    batch.non_tensor_batch['input_texts'] = np.array([self.tokenizer.decode(ids, skip_special_tokens=True) for ids in input_ids])
+                    output_ids = batch.batch['responses']
+                    batch.non_tensor_batch['output_texts'] = np.array([self.tokenizer.decode(ids, skip_special_tokens=True) for ids in output_ids])
 
                     # recompute old_log_probs
                     with _timer('old_log_prob', timing_raw):
@@ -1120,6 +1137,13 @@ class RayPPOTrainer(object):
                         # update actor
                         with _timer('update_actor', timing_raw):
                             actor_output = self.actor_rollout_wg.update_actor(batch)
+                        # Save actor_output.meta_info['metrics'] as JSON
+                        if self.config.trainer.default_local_dir is not None:
+                            hdfs_io.makedirs(self.config.trainer.default_local_dir, exist_ok=True)
+                        actor_metrics_json = json.dumps(actor_output.meta_info['metrics'])
+                        actor_metrics_save_location = f"{self.config.trainer.default_local_dir}/train_{self.global_steps}_actor_metrics.json"
+                        with open(actor_metrics_save_location, 'w') as f:
+                            f.write(actor_metrics_json)
                         actor_output_metrics = reduce_metrics(actor_output.meta_info['metrics'])
                         metrics.update(actor_output_metrics)
 
@@ -1142,6 +1166,19 @@ class RayPPOTrainer(object):
                             self.global_steps % self.config.trainer.save_freq == 0):
                         with _timer('save_checkpoint', timing_raw):
                             self._save_checkpoint()
+
+                    # log the batch
+                    if (self.global_steps - 1) % 4 == 0:
+                        trace_level_data = actor_output.meta_info['trace_level_data']
+                        rollouts = [dict(zip(trace_level_data.keys(), values)) for values in zip(*trace_level_data.values())]
+                        if self.config.trainer.default_local_dir is not None:
+                            hdfs_io.makedirs(self.config.trainer.default_local_dir, exist_ok=True)
+                        rollouts_json = json.dumps(rollouts)
+                        rollouts_save_location = f"{self.config.trainer.default_local_dir}/train_{self.global_steps}_rollouts.json"
+                        with open(rollouts_save_location, 'w') as f:
+                            f.write(rollouts_json)
+
+        
 
                 # collect metrics
                 metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic, experiment_name=self.config.trainer.experiment_name, global_steps=self.global_steps, test_freq=self.config.trainer.test_freq, tokenizer=self.tokenizer))

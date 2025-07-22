@@ -9,51 +9,122 @@
 #SBATCH --time=47:59:00
 #SBATCH --output=slurm-ray-%j.out
 #SBATCH --error=slurm-ray-%j.err  # Good practice for separate error logs
-#SBATCH --qos=flame-t2_g1_qos
+#SBATCH --qos=flame-t1b_g1_qos
 #SBATCH --account=aviralku
 
-JOB_WORKING_DIR="/home/asetlur/math-curriculum"
-MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8k-medium-b128mb64n16/global_step_60/actor"
+# JOB_WORKING_DIR="/home/asetlur/math-curriculum"
+# MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-qwen3base-easy-b128mb64n8-crh0.35l0.2/global_step_30/actor"
+# echo "Running on nodes: $SLURM_JOB_NODELIST"
+# echo "Job ID: $SLURM_JOB_ID"
+# echo "GPUs per node: $SLURM_GPUS_ON_NODE" # Verify Slurm is parsing --gres correctly
+# echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
+# cd $JOB_WORKING_DIR
+# mkdir -p $MODEL_PATH/huggingface
+# cp /project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots/d3e258980a49b060055ea9038dad99d75923f7c4/*.json $MODEL_PATH/huggingface/ 
+# python convert_fsdp_to_hf.py $MODEL_PATH $MODEL_PATH/huggingface $MODEL_PATH/hf-format 8
 
-# --- Setup ---
+
+# JOB_WORKING_DIR="/home/asetlur/math-curriculum"
+# MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-qwen3base-easy-b128mb64n8-crh0.35l0.2/global_step_60/actor"
+# echo "Running on nodes: $SLURM_JOB_NODELIST"
+# echo "Job ID: $SLURM_JOB_ID"
+# echo "GPUs per node: $SLURM_GPUS_ON_NODE" # Verify Slurm is parsing --gres correctly
+# echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
+# cd $JOB_WORKING_DIR
+# mkdir -p $MODEL_PATH/huggingface
+# cp /project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots/d3e258980a49b060055ea9038dad99d75923f7c4/*.json $MODEL_PATH/huggingface/ 
+# python convert_fsdp_to_hf.py $MODEL_PATH $MODEL_PATH/huggingface $MODEL_PATH/hf-format 8
+
+
+
+# JOB_WORKING_DIR="/home/asetlur/math-curriculum"
+# MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8k-medium2500-b64mb32n32-crh0.35l0.2/global_step_30/actor"
+# echo "Running on nodes: $SLURM_JOB_NODELIST"
+# echo "Job ID: $SLURM_JOB_ID"
+# echo "GPUs per node: $SLURM_GPUS_ON_NODE" # Verify Slurm is parsing --gres correctly
+# echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
+# cd $JOB_WORKING_DIR
+# mkdir -p $MODEL_PATH/huggingface
+# cp /project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots/d3e258980a49b060055ea9038dad99d75923f7c4/*.json $MODEL_PATH/huggingface/ 
+# python convert_fsdp_to_hf.py $MODEL_PATH $MODEL_PATH/huggingface $MODEL_PATH/hf-format 32
+
+
+# JOB_WORKING_DIR="/home/asetlur/math-curriculum"
+# MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8k-medium2500-b64mb32n32-crh0.35l0.2/global_step_90/actor"
+# echo "Running on nodes: $SLURM_JOB_NODELIST"
+# echo "Job ID: $SLURM_JOB_ID"
+# echo "GPUs per node: $SLURM_GPUS_ON_NODE" # Verify Slurm is parsing --gres correctly
+# echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
+# cd $JOB_WORKING_DIR
+# mkdir -p $MODEL_PATH/huggingface
+# cp /project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots/d3e258980a49b060055ea9038dad99d75923f7c4/*.json $MODEL_PATH/huggingface/ 
+# python convert_fsdp_to_hf.py $MODEL_PATH $MODEL_PATH/huggingface $MODEL_PATH/hf-format 32
+
+
+JOB_WORKING_DIR="/home/asetlur/math-curriculum"
+MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-medium2500-b320mb160n16genmb64-crh0.35l0.2/global_step_80/actor"
 echo "Running on nodes: $SLURM_JOB_NODELIST"
 echo "Job ID: $SLURM_JOB_ID"
-echo "GPUs per node: $SLURM_GPUS_ON_NODE" # Verify Slurm is parsing --gres correctly
+echo "GPUs per node: $SLURM_GPUS_ON_NODE" 
 echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
-
-
 cd $JOB_WORKING_DIR
-
 mkdir -p $MODEL_PATH/huggingface
 cp /project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots/d3e258980a49b060055ea9038dad99d75923f7c4/*.json $MODEL_PATH/huggingface/ 
+python convert_fsdp_to_hf.py $MODEL_PATH $MODEL_PATH/huggingface $MODEL_PATH/hf-format 16
 
-python convert_fsdp_to_hf.py $MODEL_PATH $MODEL_PATH/huggingface $MODEL_PATH/hf-format 32
+
+# JOB_WORKING_DIR="/home/asetlur/math-curriculum"
+# MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-hard64-b64mb32n16-crh0.35l0.2_redlog/global_step_60/actor"
+# echo "Running on nodes: $SLURM_JOB_NODELIST"
+# echo "Job ID: $SLURM_JOB_ID"
+# echo "GPUs per node: $SLURM_GPUS_ON_NODE" # Verify Slurm is parsing --gres correctly
+# echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
+# cd $JOB_WORKING_DIR
+# mkdir -p $MODEL_PATH/huggingface
+# cp /project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots/d3e258980a49b060055ea9038dad99d75923f7c4/*.json $MODEL_PATH/huggingface/ 
+# python convert_fsdp_to_hf.py $MODEL_PATH $MODEL_PATH/huggingface $MODEL_PATH/hf-format 32
+
+
+# JOB_WORKING_DIR="/home/asetlur/math-curriculum"
+# MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-hard64-b64mb32n16-crh0.35l0.2_redlog/global_step_90/actor"
+# echo "Running on nodes: $SLURM_JOB_NODELIST"
+# echo "Job ID: $SLURM_JOB_ID"
+# echo "GPUs per node: $SLURM_GPUS_ON_NODE" # Verify Slurm is parsing --gres correctly
+# echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
+# cd $JOB_WORKING_DIR
+# mkdir -p $MODEL_PATH/huggingface
+# cp /project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots/d3e258980a49b060055ea9038dad99d75923f7c4/*.json $MODEL_PATH/huggingface/ 
+# python convert_fsdp_to_hf.py $MODEL_PATH $MODEL_PATH/huggingface $MODEL_PATH/hf-format 32
+
+
+
+# JOB_WORKING_DIR="/home/asetlur/math-curriculum"
+# MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8koldckpt-mediumhard5000-b64mb32n32-crh0.35l0.2/global_step_120/actor"
+# echo "Running on nodes: $SLURM_JOB_NODELIST"
+# echo "Job ID: $SLURM_JOB_ID"
+# echo "GPUs per node: $SLURM_GPUS_ON_NODE" # Verify Slurm is parsing --gres correctly
+# echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
+# cd $JOB_WORKING_DIR
+# mkdir -p $MODEL_PATH/huggingface
+# cp /project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots/d3e258980a49b060055ea9038dad99d75923f7c4/*.json $MODEL_PATH/huggingface/ 
+# python convert_fsdp_to_hf.py $MODEL_PATH $MODEL_PATH/huggingface $MODEL_PATH/hf-format 32
 # python generate_sft_data_from_openthoughts.py
 
 
 
+# JOB_WORKING_DIR="/home/asetlur/math-curriculum"
+# MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8k-medium-b128mb64n16/global_step_80/actor"
+
+# # --- Setup ---
+# echo "Running on nodes: $SLURM_JOB_NODELIST"
+# echo "Job ID: $SLURM_JOB_ID"
+# echo "GPUs per node: $SLURM_GPUS_ON_NODE" # Verify Slurm is parsing --gres correctly
+# echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
 
 
+# cd $JOB_WORKING_DIR
 
+# mkdir -p $MODEL_PATH/huggingface
+# cp /project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots/d3e258980a49b060055ea9038dad99d75923f7c4/*.json $MODEL_PATH/huggingface/ 
 
-
-
-
-
-
-JOB_WORKING_DIR="/home/asetlur/math-curriculum"
-MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/16klen-qwen3easy8k-medium-b128mb64n16/global_step_80/actor"
-
-# --- Setup ---
-echo "Running on nodes: $SLURM_JOB_NODELIST"
-echo "Job ID: $SLURM_JOB_ID"
-echo "GPUs per node: $SLURM_GPUS_ON_NODE" # Verify Slurm is parsing --gres correctly
-echo "CPUs per task/node: $SLURM_CPUS_PER_TASK"
-
-
-cd $JOB_WORKING_DIR
-
-mkdir -p $MODEL_PATH/huggingface
-cp /project/flame/asetlur/hub/models--Qwen--Qwen3-1.7B/snapshots/d3e258980a49b060055ea9038dad99d75923f7c4/*.json $MODEL_PATH/huggingface/ 
-
-python convert_fsdp_to_hf.py $MODEL_PATH $MODEL_PATH/huggingface $MODEL_PATH/hf-format 32
+# python convert_fsdp_to_hf.py $MODEL_PATH $MODEL_PATH/huggingface $MODEL_PATH/hf-format 32

@@ -3,6 +3,7 @@
 # export EXPERIMENT_NAME="8klen-sftqwen2.5-easymed-ent0.002-crh0.5l0.2"
 export EXPERIMENT_NAME="8klen-qwen3base-easy-b128mb64n32-crh0.5l0.2"
 
+export MODEL_PATH="/project/flame/asetlur/checkpoints/math-curriculum/Math/8klen-qwen3-easy-crh0.5l0.2-ent0.002/global_step_100/actor/hf-format"
 # export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-qwenformat-maxlen16k/global_step_2518"
 # export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-qwenformat-maxlen2k/global_step_630"
 # export MODEL_PATH="/project/flame/asetlur/math-sft-openthoughts-maxlen8k-on-qwenr1distill/global_step_1092"
@@ -15,7 +16,7 @@ python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
     data.train_files=/project/flame/asetlur/data/easy.parquet \
     data.val_files=/project/flame/asetlur/data/hmmt_and_aime2025.parquet \
-    data.train_batch_size=128 \
+    data.train_batch_size=8 \
     data.max_prompt_length=1024 \
     data.max_response_length=8192 \
     data.max_extrapolation_length=32768 \
@@ -25,8 +26,8 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.model.use_remove_padding=True \
     actor_rollout_ref.actor.clip_ratio_low=0.2 \
     actor_rollout_ref.actor.clip_ratio_high=0.5 \
-    actor_rollout_ref.actor.ppo_mini_batch_size=64 \
-    actor_rollout_ref.actor.ppo_micro_batch_size=64 \
+    actor_rollout_ref.actor.ppo_mini_batch_size=8 \
+    actor_rollout_ref.actor.ppo_micro_batch_size=8 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \
     actor_rollout_ref.actor.only_train_on_positive=False \
     actor_rollout_ref.actor.remove_truncated=False \
@@ -45,7 +46,7 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.val_kwargs.temperature=0.6 \
     actor_rollout_ref.rollout.val_kwargs.do_sample=True \
     actor_rollout_ref.rollout.gpu_memory_utilization=0.8 \
-    actor_rollout_ref.rollout.n=32 \
+    actor_rollout_ref.rollout.n=8 \
     actor_rollout_ref.rollout.val_kwargs.n=32 \
     actor_rollout_ref.ref.fsdp_config.param_offload=True \
     actor_rollout_ref.rollout.enforce_eager=False \
@@ -58,7 +59,7 @@ python3 -m verl.trainer.main_ppo \
     trainer.logger=['console','wandb'] \
     trainer.project_name=Math \
     trainer.experiment_name=$EXPERIMENT_NAME \
-    trainer.val_before_train=True \
+    trainer.val_before_train=False \
     trainer.n_gpus_per_node=8 \
     trainer.nnodes=1 \
     trainer.save_freq=30 \

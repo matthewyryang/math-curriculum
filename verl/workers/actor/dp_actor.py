@@ -28,8 +28,9 @@ from verl.workers.actor import BasePPOActor
 from verl.utils.py_functional import append_to_dict
 from verl.utils.torch_functional import logprobs_from_logits, masked_mean
 from verl.utils.ulysses import ulysses_pad_and_slice_inputs, gather_outpus_and_unpad
-from verl.utils.seqlen_balancing import rearrange_micro_batches, get_reverse_idx
+from verl.utils.seqlen_balancing import rearrange_micro_batches, get_reverse_idx, rearrange_micro_batches_with_dataproto
 import verl.utils.torch_functional as verl_F
+from collections import defaultdict
 
 from flash_attn.bert_padding import pad_input, unpad_input, rearrange, index_first_axis
 
@@ -241,7 +242,12 @@ class DataParallelPPOActor(BasePPOActor):
         select_keys = ['responses', 'input_ids', 'attention_mask', 'position_ids', 'old_log_probs', 'advantages']
         if self.config.use_kl_loss:
             select_keys.append('ref_log_prob')
-        batch = data.select(batch_keys=select_keys).batch
+        
+        # Uncomment the following line and delete the two after that. This is only for a probe.
+        #batch = data.select(batch_keys=select_keys).batch
+        batch = data
+        # self.config.use_dynamic_bsz = False
+
         has_multi_modal_inputs = 'multi_modal_inputs' in data.non_tensor_batch.keys()
 
         # Split to make minibatch iterator for updating the actor
@@ -251,9 +257,13 @@ class DataParallelPPOActor(BasePPOActor):
             non_tensor_select_keys = ['multi_modal_inputs']
             dataloader = data.select(select_keys, non_tensor_select_keys).chunk(num_mini_batches)
         else:
-            dataloader = batch.split(self.config.ppo_mini_batch_size)
-
+            # Uncomment the following line and delete the two lines after it. This is only for a probe.
+            # dataloader = batch.split(self.config.ppo_mini_batch_size)
+            num_mini_batches = data.batch.batch_size[0] // self.config.ppo_mini_batch_size
+            dataloader = data.chunk(num_mini_batches)
+            
         metrics = {}
+        trace_level_data = defaultdict(list)
         for epoch in range(self.config.ppo_epochs):
             for batch_idx, data in enumerate(dataloader):
                 # split batch into micro_batches
@@ -264,20 +274,30 @@ class DataParallelPPOActor(BasePPOActor):
                     micro_batches = data.select(select_keys, non_tensor_select_keys).chunk(num_micro_batches)
                 elif self.config.use_dynamic_bsz:
                     max_token_len = self.config.ppo_max_token_len_per_gpu * self.ulysses_sequence_parallel_size
-                    micro_batches, _ = rearrange_micro_batches(batch=mini_batch, max_token_len=max_token_len)
+                    # micro_batches, _ = rearrange_micro_batches(batch=mini_batch, max_token_len=max_token_len)
+                    list_micro_batches, list_micro_non_tensor_batches, _ = rearrange_micro_batches_with_dataproto(
+                        data=mini_batch, max_token_len=max_token_len)
+                    micro_batches = [
+                        DataProto.from_dict(micro_batch, non_tensor_batch)
+                          for micro_batch, non_tensor_batch in zip(list_micro_batches, list_micro_non_tensor_batches)]
                 else:
                     self.gradient_accumulation = self.config.ppo_mini_batch_size // self.config.ppo_micro_batch_size_per_gpu
                     # split batch into micro_batches
-                    micro_batches = mini_batch.split(self.config.ppo_micro_batch_size_per_gpu)
-
+                     # Uncomment the following line and delete the line after it. This is only for a probe.
+                    # micro_batches = mini_batch.split(self.config.ppo_micro_batch_size_per_gpu)
+                    micro_batches = mini_batch.chunk(self.config.ppo_mini_batch_size // self.config.ppo_micro_batch_size_per_gpu)
                 self.actor_optimizer.zero_grad()
 
                 for data in micro_batches:
                     # Support all hardwares
+                    print("data tyope:", type(data))
+                    print("Data batch:", data.batch.keys())
+                    print("Data non-tensor batch", data.non_tensor_batch.keys())
                     if isinstance(data, DataProto):
                         data = {**data.batch.to(torch.cuda.current_device()), **data.non_tensor_batch}
                     else:
                         data = data.to(torch.cuda.current_device())  # actor device is cpu when using offload
+                    print("Data keys:", data.keys())
                     responses = data['responses']
                     response_length = responses.size(1)
                     attention_mask = data['attention_mask']
@@ -305,7 +325,7 @@ class DataParallelPPOActor(BasePPOActor):
                         metrics['actor/frac_trained_on'] = (response_mask.shape[0] - (response_mask.sum(dim=-1) == 0.).sum().item()) / response_mask.shape[0]
 
 
-                    pg_loss, pg_clipfrac, ppo_kl, pg_clipfrac_lower = compute_policy_loss(
+                    pg_loss, pg_clipfrac, ppo_kl, pg_clipfrac_lower, ratio, did_ppo_clip = compute_policy_loss(
                         old_log_prob=old_log_prob,
                         log_prob=log_prob,
                         advantages=advantages,
@@ -341,17 +361,33 @@ class DataParallelPPOActor(BasePPOActor):
                         loss = policy_loss / self.gradient_accumulation
                     loss.backward()
 
-                    data = {
+                    append_to_dict(metrics, {
                         'actor/entropy': entropy_loss.detach().item(),
                         'actor/pg_loss': pg_loss.detach().item(),
                         'actor/pg_clipfrac': pg_clipfrac.detach().item(),
                         'actor/ppo_kl': ppo_kl.detach().item(),
                         'actor/pg_clipfrac_lower': pg_clipfrac_lower.detach().item(),
-                    }
-                    append_to_dict(metrics, data)
+                    })
+
+                    # update trace level data
+                    # trace_level_data['input_ids'] += data['input_ids'].cpu().tolist()
+                    trace_level_data['responses'] += data['responses'].cpu().tolist()
+                    trace_level_data['response_mask'] += data['response_mask'].cpu().tolist()
+                    # trace_level_data['position_ids'] += data['position_ids'].cpu().tolist()
+                    # trace_level_data['attention_mask'] += data['attention_mask'].cpu().tolist()
+                    # trace_level_data['advantages'] += data['advantages'].cpu().tolist()
+                    trace_level_data['indices'] += data['indices'].tolist()
+                    trace_level_data['input_texts'] += data['input_texts'].tolist()
+                    trace_level_data['output_texts'] += data['output_texts'].tolist()
+                    # trace_level_data['log_probs'] += log_prob.cpu().tolist()
+                    trace_level_data['score'] += data['token_level_scores'].cpu().sum(dim=-1).tolist()
+                    trace_level_data['entropy'] += entropy.cpu().tolist()
+                    trace_level_data['ratio'] += ratio.cpu().tolist()
+                    # trace_level_data['did_ppo_clip'] += did_ppo_clip.cpu().tolist()
+                    
 
                 grad_norm = self._optimizer_step()
                 data = {'actor/grad_norm': grad_norm.detach().item()}
             append_to_dict(metrics, data)
         self.actor_optimizer.zero_grad()
-        return metrics
+        return metrics, trace_level_data
